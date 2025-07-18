@@ -38,7 +38,7 @@ public class Damage : MonoBehaviour
 	//called when an object gets hit
 	public virtual void OnHit(Damage attacker, float dmg) 
 	{
-		Debug.Log(this);
+		//Debug.Log(this);
 			this.health.TakeDamage(dmg);
 			//death check
 			
@@ -62,7 +62,7 @@ public class Damage : MonoBehaviour
 			if(targetDamage.team != this.team) 
 			{	
 				targetDamage.OnHit(this,dmg);
-				return true;	
+				return true;
 			} 
 		}
 		return false;

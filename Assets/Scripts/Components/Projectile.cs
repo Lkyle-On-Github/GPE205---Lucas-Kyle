@@ -9,7 +9,7 @@ public class Projectile : MonoBehaviour
 	public Controller shooter;
 	public float awakeTime;
 	//time in seconds until bullet disapears
-	public float decayTime = 2;
+	public float decayTime;
 	
 	public virtual void Update() 
 	{

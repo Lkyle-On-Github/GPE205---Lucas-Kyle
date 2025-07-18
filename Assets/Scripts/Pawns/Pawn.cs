@@ -10,6 +10,9 @@ public abstract class Pawn : MonoBehaviour
     public float turnSpeed;
 	//the controller associated with this pawn (needed in order to feed the bullet this info)
 	public Controller controller;
+	public Mover mover;
+	public Shooter shooter;
+	public Damage damage;
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -31,6 +34,13 @@ public abstract class Pawn : MonoBehaviour
     public abstract void MoveForward();
     public abstract void MoveBackward();
 	public abstract void Shoot();
+	//I think you want me to do it like this?
+	public abstract void Seek(Vector3 targetPos);
+	public abstract void Seek(Transform target);
+	public abstract void Seek(GameObject target);
+	public abstract void Seek(Pawn target);
+	public abstract void Seek(Controller target);
+	
     
 	public void OnDestroy()
 	{

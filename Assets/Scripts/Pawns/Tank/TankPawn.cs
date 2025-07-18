@@ -6,9 +6,7 @@ public class TankPawn : Pawn
 {
     Rigidbody rb;
     //rigidbody = GetComponent<Rigidbody>();
-    public Mover mover;
-	public Shooter shooter;
-	public Damage damage;
+    
 	
 
     Vector3 moveVector = Vector3.forward;
@@ -56,5 +54,32 @@ public class TankPawn : Pawn
 		shooter.FireTankBullet(damage.team);
 	}
 
+	public override void Seek(Vector3 target)
+	{
+		mover.RotateTowards(target);
+		mover.Move(true);
+	}
+	public override void Seek(Transform target)
+	{
+
+		mover.RotateTowards(target.position);
+		mover.Move(true);
+	}
+	public override void Seek(GameObject target)
+	{
+		mover.RotateTowards(target.transform.position);
+		mover.Move(true);
+	}
+	public override void Seek(Pawn target)
+	{
+
+		mover.RotateTowards(target.transform.position);
+		mover.Move(true);
+	}
+	public override void Seek(Controller target)
+	{
+		mover.RotateTowards(target.pawn.transform.position);
+		mover.Move(true);
+	}
 
 }

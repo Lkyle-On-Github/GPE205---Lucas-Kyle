@@ -7,7 +7,9 @@ public class GameManager : MonoBehaviour
     //idk why it says to do this at the bottom so I guess we'll find out
     // Prefabs
     public GameObject prePlayerController;
+	public GameObject preAIControllerTank;
     public GameObject preTankPawn;
+
 
 	//Instances
     //I just feel like this is a better name because it is technically a reference to an object.
@@ -18,6 +20,7 @@ public class GameManager : MonoBehaviour
 	public List<PlayerController> listPlayers;
 	public List<Controller> listControllers;
 	public List<Pawn> listPawns;
+	public List<Spawnpoint> listSpawns;
 
     //reference to self
 	public static GameManager inst;
@@ -31,16 +34,31 @@ public class GameManager : MonoBehaviour
 
             DontDestroyOnLoad(gameObject);
         } else 
-		{
-          Destroy(gameObject);
-        }
+		if(inst != this) 
+			{
+				Destroy(gameObject);	
+			}
     } 
 
     
     // Start is called before the first frame update
     void Start()
     {
-        SpawnPlayer();
+		 //Singleton Check
+        if (inst == null) 
+		{
+            inst = this;
+
+            DontDestroyOnLoad(gameObject);
+        } else 
+		{
+			if(inst != this) 
+			{
+				Destroy(gameObject);	
+			}
+          }
+		SpawnPlayer();
+		SpawnAllEnemies();
     }
 
     // Update is called once per frame
@@ -63,6 +81,15 @@ public class GameManager : MonoBehaviour
 		compController.pawn = compPawn;
 		compPawn.controller = compController;
     }
+
+	public void SpawnAllEnemies()
+	{
+		for(int i = 0; i < listSpawns.Count; i++)
+		{
+			Spawnpoint currSpawn = listSpawns[i];
+			currSpawn.Spawn();
+		}
+	}
 
 	/*
 	I spent so long trying to find a way to make this work :(
