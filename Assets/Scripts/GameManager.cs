@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
 	public GameObject preAIControllerTank;
     public GameObject preTankPawn;
 
-
+	public enum Noises {Movement, Shot, Explosion, Hit};
 	//Instances
     //I just feel like this is a better name because it is technically a reference to an object.
     public Transform playerSpawn;
@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour
 	public List<Controller> listControllers;
 	public List<Pawn> listPawns;
 	public List<Spawnpoint> listSpawns;
+
+	public List<NoiseMaker> activeNoises;
 
     //reference to self
 	public static GameManager inst;

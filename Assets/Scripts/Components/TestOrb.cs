@@ -2,9 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TankShooter : Shooter
+public class TestOrb : MonoBehaviour
 {
-	/*
     // Start is called before the first frame update
     void Start()
     {
@@ -16,10 +15,4 @@ public class TankShooter : Shooter
     {
         
     }
-	*/
-	public override void FireTankBullet(int team)
-	{
-		base.FireTankBullet(team);
-		pawn.MakeNoise(GameManager.Noises.Shot);
-	}
 }

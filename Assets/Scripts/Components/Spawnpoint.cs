@@ -16,7 +16,7 @@ public class Spawnpoint : MonoBehaviour
 				GameManager.inst.listSpawns.Add(this);
 		}
 	}
-	public void Spawn()
+	public virtual void Spawn()
 	{
 		GameObject objNewAI = Instantiate(controller, Vector3.zero, Quaternion.identity) as GameObject;
         GameObject objNewPawn = Instantiate(pawn, this.transform.position, this.transform.rotation) as GameObject;

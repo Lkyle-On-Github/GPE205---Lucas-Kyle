@@ -45,7 +45,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 0}
+  hearDistance: 3
+  viewAngle: 90
+  viewDistance: 100
+  canSee: 0
+  canHear: 0
+  senseUpdateInterval: 0.05
+  audibleNoises: []
+  visiblePawns: []
+  moveCheckDist: 2
+  chosenDir: 0
   lastStateSwapTime: 0
-  chaseDistance: 5
-  target: {fileID: 0}
   state: 0
+  chaseDistance: 5
+  fleeDistance: 10
+  lowHealth: 5
+  target: {fileID: 0}
+  testOrb: {fileID: 0}

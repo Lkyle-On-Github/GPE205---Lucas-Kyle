@@ -18,11 +18,20 @@ public class TankMover : Mover
     public override void Move(bool forward) {
         dir = (forward) ? 1 : -1;
         rb.MovePosition(rb.position + (transform.forward * pawn.moveSpeed * Time.deltaTime * dir));
+		pawn.MakeNoise(GameManager.Noises.Movement);
     }
+	public override void Move(bool forward, float speed)
+	{
+		dir = (forward) ? 1 : -1;
+        rb.MovePosition(rb.position + (transform.forward * speed * Time.deltaTime * dir));
+		pawn.MakeNoise(GameManager.Noises.Movement);
+	}
 
     public override void Turn(bool clockwise) {
         dir = (clockwise) ? -1 : 1;
         transform.Rotate(0, pawn.turnSpeed * dir * Time.deltaTime, 0);
+		//it does make sense for the turning to make noise but the player would be very annoyed
+		//pawn.MakeNoise(GameManager.Noises.Movement);
     }
 
 	public override void RotateTowards(Vector3 targetPos) 
@@ -36,5 +45,12 @@ public class TankMover : Mover
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, pawn.turnSpeed * Time.deltaTime);
 
 	}
+	/*
+	public override void LoopRotation()
+	{
+		//I checked and it doesnst seem to put rotation out of a -180 to 180 range, but it will stay out of bounds if it is instantiated out of bounds so I think I should still change it? let me think about this
+		if()
+	}
+	*/
 
 }

@@ -13,6 +13,9 @@ public abstract class Pawn : MonoBehaviour
 	public Mover mover;
 	public Shooter shooter;
 	public Damage damage;
+	public Health health;
+	public GameObject leftSide;
+	public GameObject rightSide;
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -26,12 +29,14 @@ public abstract class Pawn : MonoBehaviour
     // Update is called once per frame
     public virtual void Update()
     {
-
+		//I think this doesnt do anything
     }
 
     public abstract void RotateClockwise();
     public abstract void RotateCounterClockwise();
+	public abstract void RotateTowardsPoint(Vector3 target);
     public abstract void MoveForward();
+	public abstract void MoveForward(float speed);
     public abstract void MoveBackward();
 	public abstract void Shoot();
 	//I think you want me to do it like this?
@@ -40,6 +45,8 @@ public abstract class Pawn : MonoBehaviour
 	public abstract void Seek(GameObject target);
 	public abstract void Seek(Pawn target);
 	public abstract void Seek(Controller target);
+	
+	public abstract void MakeNoise(GameManager.Noises noise);
 	
     
 	public void OnDestroy()

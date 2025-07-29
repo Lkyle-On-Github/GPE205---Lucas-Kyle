@@ -47,3 +47,4 @@ MonoBehaviour:
   team: 0
   controller: {fileID: 6198084285377704705, guid: 9bbce2ac57ae1004cbae30c33323b555, type: 3}
   pawn: {fileID: 3831453627911563811, guid: 8e3e332517b4e954b8983a0b18a4173a, type: 3}
+  preTestOrb: {fileID: 247693196129895500, guid: c0ecae18e401dab4aa2318ef493e958c, type: 3}

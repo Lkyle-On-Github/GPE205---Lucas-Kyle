@@ -31,6 +31,7 @@ public class Shooter : MonoBehaviour
 
 	private Damage damage;
 	private Controller controller;
+	public Pawn pawn;
 
 	//Misc Variables
 	private float fireTime;
@@ -42,6 +43,8 @@ public class Shooter : MonoBehaviour
 		shootAng = aimObj.transform.localRotation;
 
 		damage = GetComponent<Damage>();
+		pawn = GetComponent<Pawn>();
+		//should rewrite this but I wont
 		controller = GetComponent<Pawn>().controller;
 		//Debug.Log(controller);
     }

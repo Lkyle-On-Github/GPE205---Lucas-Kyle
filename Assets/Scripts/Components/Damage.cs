@@ -5,6 +5,7 @@ using UnityEngine;
 public class Damage : MonoBehaviour
 {
 	public Health health;
+	public Pawn pawn;
 
 	//0 is player team, 1 is enemy team
 	public int team;
@@ -14,6 +15,7 @@ public class Damage : MonoBehaviour
     void Start()
     {
         health = GetComponent<Health>();
+		pawn = GetComponent<Pawn>();
     }
 
 
@@ -40,6 +42,10 @@ public class Damage : MonoBehaviour
 	{
 		//Debug.Log(this);
 			this.health.TakeDamage(dmg);
+			if(pawn != null) 
+			{
+				pawn.MakeNoise(GameManager.Noises.Hit);
+			}
 			//death check
 			
 	}

@@ -11,6 +11,9 @@ public class TankPawn : Pawn
 
     Vector3 moveVector = Vector3.forward;
 
+	NoiseMaker treadsNoisemaker;
+	NoiseMaker shotNoisemaker;
+	NoiseMaker hitNoisemaker;
 
     // Start is called before the first frame update
     public override void Start()
@@ -20,7 +23,11 @@ public class TankPawn : Pawn
         mover = GetComponent<Mover>();
 		shooter = GetComponent<Shooter>();
 		damage = GetComponent<Damage>();
+		health = GetComponent<Health>();
 
+		treadsNoisemaker = GetComponent<TreadsNoisemaker>();
+		shotNoisemaker = GetComponent<ShotNoisemaker>();
+		hitNoisemaker = GetComponent<HitNoisemaker>();
 		base.Start();
     }
 
@@ -39,10 +46,21 @@ public class TankPawn : Pawn
     {
         mover.Turn(false);
     }
+
+	public override void RotateTowardsPoint(Vector3 target)
+	{
+		mover.RotateTowards(target);
+	}
+
     public override void MoveForward()
     {
         mover.Move(true);
     }
+
+	public override void MoveForward(float speed)
+	{
+		mover.Move(true, speed);
+	}
 
     public override void MoveBackward()
     {
@@ -53,7 +71,7 @@ public class TankPawn : Pawn
 	{
 		shooter.FireTankBullet(damage.team);
 	}
-
+	#region Seek
 	public override void Seek(Vector3 target)
 	{
 		mover.RotateTowards(target);
@@ -81,5 +99,21 @@ public class TankPawn : Pawn
 		mover.RotateTowards(target.pawn.transform.position);
 		mover.Move(true);
 	}
+	#endregion
 
+	public override void MakeNoise(GameManager.Noises noise)
+	{
+		switch (noise)
+		{
+			case GameManager.Noises.Movement:
+				treadsNoisemaker.StartNoise(transform.position);
+				break;
+			case GameManager.Noises.Shot:
+				shotNoisemaker.StartNoise(transform.position);
+				break;
+			case GameManager.Noises.Hit:
+				hitNoisemaker.StartNoise(transform.position);
+				break;
+		}
+	}
 }
