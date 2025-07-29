@@ -15,7 +15,10 @@ public class GameManager : MonoBehaviour
     //I just feel like this is a better name because it is technically a reference to an object.
     public Transform playerSpawn;
 
-
+	//surely I can just use an array for this.
+	//low boundry to high boundry
+	public List<int> mapBoundsX;
+	public List<int> mapBoundsZ;
 	//Misc
 	public List<PlayerController> listPlayers;
 	public List<Controller> listControllers;

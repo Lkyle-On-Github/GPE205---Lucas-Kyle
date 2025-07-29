@@ -17,6 +17,7 @@ public class AIController : Controller
 	public bool canHear;
 	//accessable to developers incase they want to make a less important AI take up less resources
 	public float senseUpdateInterval;
+	public float seekDist;
 	private float lastSenseUpdate;
 
 	public List<NoiseMaker> audibleNoises;
@@ -34,6 +35,7 @@ public class AIController : Controller
     // Start is called before the first frame update
     public override void Start()
     {
+		
         base.Start();
 		state = States.Idle;
 		StateStart();
@@ -59,11 +61,21 @@ public class AIController : Controller
 	
 	public float lastStateSwapTime;
 	
-	public enum States {Idle, Chase, Flee, Patrol, ChooseTarget};
+	public enum States {Idle, Chase, Flee, Patrol, ChooseTarget, Investigate, Guard, Follow, Fire, SpotPlayer};
 	
 	//since this should only be changed through the SwapState method, it is private to avoid accidental modification
 	public States state;
 
+	protected bool DistanceCheck(Vector3 checkTarget, float checkDist)
+    {
+		if (Vector3.Distance(pawn.transform.position, checkTarget) < checkDist) 
+		{
+			{
+				return true;
+			}
+		}
+        return false;
+    }
 
 	protected virtual void MakeDecisions() 
 	{
@@ -96,11 +108,14 @@ public class AIController : Controller
 	}
 	protected virtual void SwapState(States newState)
 	{
+		if(state != newState)
+		{
 		StateEnd();
 		state = newState;
 		StateStart();
 
 		lastStateSwapTime = Time.time;
+		}
 	}
 
 	protected virtual void Hearing()
@@ -174,6 +189,7 @@ public class AIController : Controller
 				Hearing();
 			}
 			lastSenseUpdate = Time.time;
+			OnSenseUpdate();
 		}
 	}
 
@@ -231,7 +247,7 @@ public class AIController : Controller
 		pawn.Seek(seekObj);
 	}
 
-	//I should make this code more efficient by making the raycasts only update when sense updates are done but im already late so I just have to move on
+	//the big mistake I made with this code was forgetting what turnsetting was and trying to use it as a toggle for what side of the AI the wall is on when that was not its intended purpose, and im not really sure what to do about it except starting over.
 	protected virtual void SeekSmart(Vector3 seekPos)
 	{
 		//cache the current facing direction
@@ -244,7 +260,7 @@ public class AIController : Controller
 
 		Vector3 calcPawnPos = pawn.transform.position;
 		
-		//modify the point ur checking based on what direction ur turning, to prevent getting stuck on corners
+		//I think this is unused
 		switch(chosenDir)
 						{
 							case TurnSetting.Clockwise:
@@ -254,21 +270,25 @@ public class AIController : Controller
 								calcPawnPos = pawn.rightSide.transform.position;
 								break;
 						}
-		bool hitLeft = Physics.Raycast(pawn.leftSide.transform.position, pawn.transform.forward, out hitInfoLeft, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
-		bool hitRight = Physics.Raycast(pawn.rightSide.transform.position, pawn.transform.forward, out hitInfoRight, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+		int hitCounter = 0;
+		bool hitLeft = Physics.Raycast(pawn.transform.position, pawn.leftSide.transform.forward, out hitInfoLeft, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+		bool hitRight = Physics.Raycast(pawn.transform.position, pawn.rightSide.transform.forward, out hitInfoRight, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
 		if(hitLeft && hitInfoLeft.transform.gameObject.GetComponent<Pawn>() == null)
 		{
 			hitInfo = hitInfoLeft;
 			calcPawnPos = pawn.leftSide.transform.position;
+			hitCounter += 1;
 		}
 		if(hitRight && hitInfoRight.transform.gameObject.GetComponent<Pawn>() == null)
 		{
 			hitInfo = hitInfoRight;
 			calcPawnPos = pawn.rightSide.transform.position;
+			hitCounter += 1;
 		}
-
+		
+		
 		//check if it hit anything
-		Debug.Log(Physics.Raycast(calcPawnPos, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal));
+		//Debug.Log(Physics.Raycast(calcPawnPos, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal));
 		if(Physics.Raycast(calcPawnPos, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal))
 		{
 			//check if that hit was a pawn
@@ -305,14 +325,17 @@ public class AIController : Controller
 										//the only problem with this is that if the AI's rotation is set outside of the -180 to 180 range this wont work, but I just wont do that so its fine!
 										if(pawn.transform.rotation.y - rotToTarget.y > 0)
 										{
+											
 											chosenDir = TurnSetting.Clockwise;
 										} else
 										{
 											chosenDir = TurnSetting.CounterClockwise;
+											
 										} 
 										if(pawn.transform.rotation.y - rotToTarget.y > 180 || pawn.transform.rotation.y - rotToTarget.y < -180) 
 										{
 											//chosenDir = !chosenDir; 
+										
 											//damn it
 											if(chosenDir == TurnSetting.Clockwise) 
 											{
@@ -330,7 +353,7 @@ public class AIController : Controller
 									//return back to cached value
 									pawn.transform.rotation = cachedQuat;
 									//disable turning
-									chosenDir = TurnSetting.None;
+									//chosenDir = TurnSetting.None;
 								}
 								break;
 							//it is already turning away, keep turning
@@ -352,13 +375,34 @@ public class AIController : Controller
 			{
 				//it is facing a pawn, so it doesnt need to turn
 				//Disable turning setting
-				chosenDir = TurnSetting.None;
+				//chosenDir = TurnSetting.None;
 			}
 		} else
 		{
 			//if it didnt hit anything, then its all good
+			//neither raycast hit anything, disable turning
+			if(hitCounter == 0)
+			{
+				
+				if(!Physics.Raycast(pawn.transform.position, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal) || hitInfo.transform.gameObject.GetComponent<Pawn>() == null)
+				{
+					//Debug.Log("dangit");
+					switch(chosenDir)
+					{
+						case TurnSetting.Clockwise:
+								pawn.transform.rotation = cachedQuat;
+								pawn.RotateClockwise();
+								break;
+							case TurnSetting.CounterClockwise:
+								pawn.transform.rotation = cachedQuat;
+								pawn.RotateCounterClockwise();
+								break;
+					}
+					chosenDir = TurnSetting.None;
+				}
+			}
 			//Disable turning setting
-			chosenDir = TurnSetting.None;
+			//chosenDir = TurnSetting.None;
 		}
 			//if it didnt hit anything, then the turn is good
 		//move forward regardless of whether or not it hit
@@ -368,7 +412,27 @@ public class AIController : Controller
 
 		//this code shouldnt be able to avoid corners.
 	}
-}
 
+	protected virtual Vector3 RandomMapPos()
+	{
+		return new Vector3(Random.Range(GameManager.inst.mapBoundsX[0], GameManager.inst.mapBoundsX[1]), 0, Random.Range(GameManager.inst.mapBoundsZ[0], GameManager.inst.mapBoundsZ[1]));
+	}
+
+	//code that the AI will execute on every sense update
+	protected virtual void OnSenseUpdate()
+	{
+
+	}
+
+	protected virtual bool PointVisible(Vector3 point)
+	{
+		RaycastHit hitInfo;
+		Vector3 toPoint = point - pawn.transform.position;
+		float pointDist = Vector3.Distance(point, pawn.transform.position);
+		//if it hit nothing
+		return !Physics.Raycast(pawn.transform.position, toPoint, out hitInfo, pointDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+			
+	}
+}
 //TO DO
 //make sure pawns can't hear themselves

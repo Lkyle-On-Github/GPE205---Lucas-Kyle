@@ -8,7 +8,6 @@ public class EnemyTankSpawnpoint : Spawnpoint
     void Start()
     {
         team = 1;
-		controller = GameManager.inst.preAIControllerTank;
 		pawn = GameManager.inst.preTankPawn;
 
 		base.Start();
