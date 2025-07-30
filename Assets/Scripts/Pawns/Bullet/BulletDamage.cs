@@ -50,7 +50,7 @@ public class BulletDamage : Damage
 			//Debug.Log(proj);
 
 			//if what it is colliding with is it's shooter
-			if(collider.gameObject != proj.shooter.pawn.gameObject) 
+			if(proj.shooter.pawn == null || collider.gameObject != proj.shooter.pawn.gameObject) 
 			{
 				//Debug.Log("COLLIDING!!");
 				Attack(collider.gameObject, damage);

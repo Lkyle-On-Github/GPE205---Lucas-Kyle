@@ -57,7 +57,7 @@ public class TankAIAgressor : AIController
 				{
 					SeekSmart(target.transform.position);
 				}
-				pawn.Shoot();
+				Shoot();
 			//state change check
 				if(pawn.health.hp <= lowhealth)
 				{
@@ -70,7 +70,7 @@ public class TankAIAgressor : AIController
 				{
 					RotateTowards(target.transform.position);
 					MoveBackward();
-					pawn.Shoot();
+					Shoot();
 				}
 			//state change check
 				

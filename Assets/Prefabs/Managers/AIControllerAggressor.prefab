@@ -62,7 +62,7 @@ MonoBehaviour:
   lastStateSwapTime: 0
   state: 0
   investigateDist: 3
-  wanderDist: 2
+  wanderDist: 4
   idleTime: 2.5
   lowhealth: 5
   target: {fileID: 0}

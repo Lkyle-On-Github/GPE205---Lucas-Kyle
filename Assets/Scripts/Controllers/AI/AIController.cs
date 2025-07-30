@@ -66,16 +66,7 @@ public class AIController : Controller
 	//since this should only be changed through the SwapState method, it is private to avoid accidental modification
 	public States state;
 
-	protected bool DistanceCheck(Vector3 checkTarget, float checkDist)
-    {
-		if (Vector3.Distance(pawn.transform.position, checkTarget) < checkDist) 
-		{
-			{
-				return true;
-			}
-		}
-        return false;
-    }
+	
 
 	protected virtual void MakeDecisions() 
 	{
@@ -209,6 +200,17 @@ public class AIController : Controller
 		
 	}
 
+	protected bool DistanceCheck(Vector3 checkTarget, float checkDist)
+    {
+		if (Vector3.Distance(pawn.transform.position, checkTarget) < checkDist) 
+		{
+			{
+				return true;
+			}
+		}
+        return false;
+    }
+
 	protected virtual bool CheckNoisePrio(NoiseMaker noise)
 	{
 		if (noisePrio.IndexOf(noise.noise) < noisePrio.IndexOf(targetNoise.noise))
@@ -236,6 +238,15 @@ public class AIController : Controller
 	protected virtual void RotateTowards(Vector3 rotatePos)
 	{
 		pawn.RotateTowardsPoint(rotatePos);
+	}
+
+	protected virtual void RotateClockwise()
+	{
+		pawn.RotateClockwise();
+	}
+	protected virtual void Shoot()
+	{
+		pawn.Shoot();
 	}
 
 	protected virtual void SeekPoint(Vector3 seekPos)
