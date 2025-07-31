@@ -7,6 +7,7 @@ public class Controller : MonoBehaviour
 {
     //the pawn instance assigned to this controller, should be initialized when this pawn is spawned
     public Pawn pawn;
+	
 
     // Start is called before the first frame update
     public virtual void Start()

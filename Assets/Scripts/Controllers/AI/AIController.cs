@@ -23,7 +23,7 @@ public class AIController : Controller
 	public List<NoiseMaker> audibleNoises;
 	//used in check noise prio, noises further to the left in the list (lower index number) have a higher priority. Noises this AI ignores can be left out of the prio list, but you dont have to use noisePrio
 	public List<GameManager.Noises> noisePrio;
-	public List<Pawn> visiblePawns;
+	public List<Pawn> visiblePawns;//
 
 	public NoiseMaker targetNoise;
 	public Vector3 targetNoisePos;
@@ -61,7 +61,7 @@ public class AIController : Controller
 	
 	public float lastStateSwapTime;
 	
-	public enum States {Idle, Chase, Flee, Patrol, ChooseTarget, Investigate, Guard, Follow, Fire, SpotPlayer};
+	public enum States {Idle, Chase, Flee, Patrol, ChooseTarget, Investigate, Guard, Follow, Fire, SpotPlayer, Celebrate};
 	
 	//since this should only be changed through the SwapState method, it is private to avoid accidental modification
 	public States state;
@@ -115,12 +115,15 @@ public class AIController : Controller
 		//iterates through the global array of active noises
 		for(int i = 0; i < GameManager.inst.activeNoises.Count; i++)
 		{
-			if(Vector3.Distance(transform.position, GameManager.inst.activeNoises[i].noiseLocation) < (hearDistance + GameManager.inst.activeNoises[i].volumeDistance))
+			if(GameManager.inst.activeNoises[i].pawn != pawn)
 			{
-				//adds it to the local array of noises this instance can hear
-				if(GameManager.inst.activeNoises[i].active = true)
+				if(Vector3.Distance(transform.position, GameManager.inst.activeNoises[i].noiseLocation) < (hearDistance + GameManager.inst.activeNoises[i].volumeDistance))
 				{
-					audibleNoises.Add(GameManager.inst.activeNoises[i]);
+					//adds it to the local array of noises this instance can hear
+					if(GameManager.inst.activeNoises[i].active == true)  
+					{
+						audibleNoises.Add(GameManager.inst.activeNoises[i]);
+					}
 				}
 			}
 		}

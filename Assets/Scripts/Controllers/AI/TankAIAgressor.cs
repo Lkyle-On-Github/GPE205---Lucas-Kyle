@@ -14,8 +14,9 @@ public class TankAIAgressor : AIController
 	private bool subStateWander;
 
 	public Pawn target;
-	void Start()
+	public override void Start()
     {
+		base.Start();
 		StateStart();
 		//perhaps I should make this pick the closest player?
         target = GameManager.inst.listPlayers[0].pawn;
@@ -142,65 +143,68 @@ public class TankAIAgressor : AIController
 
 	protected override void OnSenseUpdate()
 	{
-		//Debug.Log("on sense updating!!!");
-		switch(state)
+		if(target != null)
 		{
-			case States.Idle:
-				for(int i = 0; i < audibleNoises.Count; i++)
-				{
-					if(audibleNoises[i].noise == GameManager.Noises.Shot)
+			//Debug.Log("on sense updating!!!");
+			switch(state)
+			{
+				case States.Idle:
+					for(int i = 0; i < audibleNoises.Count; i++)
 					{
-						targetNoise = audibleNoises[i];
-						targetNoisePos = GetNoisePos(targetNoise);
-						SwapState(States.Investigate);
+						if(audibleNoises[i].noise == GameManager.Noises.Shot)
+						{
+							targetNoise = audibleNoises[i];
+							targetNoisePos = GetNoisePos(targetNoise);
+							SwapState(States.Investigate);
+						}
 					}
-				}
-				if(target != null)
-				{
-					if(visiblePawns.Contains(target))
+					if(target != null)
 					{
-						SwapState(States.Chase);
+						if(visiblePawns.Contains(target))
+						{
+							SwapState(States.Chase);
+						}
 					}
-				}
-				/*
-				for (int i = 0; i < visiblePawns.Count; i++)
-				{
-					if(visiblePawns[i] == target) 
+					/*
+					for (int i = 0; i < visiblePawns.Count; i++)
 					{
-						SwapState(States.Chase);
+						if(visiblePawns[i] == target) 
+						{
+							SwapState(States.Chase);
+						}
 					}
-				}
-				*/
-				break;
-			case States.Investigate:
-				if(target != null)
-				{
-					if(visiblePawns.Contains(target))
-					{
-						SwapState(States.Chase);
-					}
-				}
+					*/
 					break;
-			case States.Chase:
-				if(target != null)
-				{
-					if(!visiblePawns.Contains(target))
+				case States.Investigate:
+					if(target != null)
 					{
-						targetNoisePos = target.transform.position;
-						SwapState(States.Investigate);
+						if(visiblePawns.Contains(target))
+						{
+							SwapState(States.Chase);
+						}
 					}
-				}
-				break;
-			case States.Flee:
-				if(target != null)
-				{
-					if(!visiblePawns.Contains(target))
+						break;
+				case States.Chase:
+					if(target != null)
 					{
-						targetNoisePos = target.transform.position;
-						SwapState(States.Investigate);
+						if(!visiblePawns.Contains(target))
+						{
+							targetNoisePos = target.transform.position;
+							SwapState(States.Investigate);
+						}
 					}
-				}
-				break;
+					break;
+				case States.Flee:
+					if(target != null)
+					{
+						if(!visiblePawns.Contains(target))
+						{
+							targetNoisePos = target.transform.position;
+							SwapState(States.Investigate);
+						}
+					}
+					break;
+			}
 		}
 	}
 }

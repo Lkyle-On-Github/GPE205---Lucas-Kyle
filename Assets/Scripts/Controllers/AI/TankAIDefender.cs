@@ -45,8 +45,11 @@ public class TankAIDefender : AIController
 				break;
 			case States.Fire:
 			//state behaviour
+				if(target != null) 
+				{
 				RotateTowards(target.transform.position);
 				pawn.Shoot();
+				}
 			//state change check
 				//done in sense update
 				break;

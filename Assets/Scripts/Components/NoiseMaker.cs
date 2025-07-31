@@ -20,13 +20,17 @@ public class NoiseMaker : MonoBehaviour
 	public float noiseTime;
 	//the location the noise plays
 	public Vector3 noiseLocation;
-
+	public bool NoPawn;
+	public Pawn pawn;
 
 
     // Start is called before the first frame update
-    void Start()
+    public virtual void Start()
     {
-        
+		if(!NoPawn)
+		{
+       		pawn = GetComponent<Pawn>();
+		}
     }
 
     // Update is called once per frame
