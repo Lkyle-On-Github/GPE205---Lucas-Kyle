@@ -44,6 +44,16 @@ public class Health : MonoBehaviour
 		}
 	}
 
+	public virtual void TakeHealing(float healing)
+	{
+		hp += healing;
+		MaxHpCheck();
+		if(hp <= 0) 
+		{
+			Die();
+		}
+	}
+
 	//you might want to call this whenever you do a healing effect, to ensure they dont go over their max hp.
 	public virtual void MaxHpCheck()
 	{

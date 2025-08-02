@@ -1,14 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+	public int randomSeed;
     //idk why it says to do this at the bottom so I guess we'll find out
     // Prefabs
     public GameObject prePlayerController;
 	public GameObject preAIControllerTank;
     public GameObject preTankPawn;
+	public GameObject hasMapGenerator;
+	public bool daily;
 
 	public enum Noises {Movement, Shot, Explosion, Hit};
 	//Instances
@@ -49,6 +53,15 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+		if(daily)
+		{
+			randomSeed = DateToInt(DateTime.Now.Date);
+		} else
+		{
+			randomSeed = DateToInt(DateTime.Now);
+		}
+		UnityEngine.Random.InitState(randomSeed);
+		hasMapGenerator.GetComponent<MapGenerator>().GenerateMap();
 		 //Singleton Check
         if (inst == null) 
 		{
@@ -110,4 +123,8 @@ public class GameManager : MonoBehaviour
 		}
 	}
 	*/
+	public int DateToInt ( DateTime dateToUse ) {
+     // Add our date up and return it
+     return dateToUse.Year + dateToUse.Month + dateToUse.Day + dateToUse.Hour + dateToUse.Minute + dateToUse.Second + dateToUse.Millisecond;
+ }
 }
