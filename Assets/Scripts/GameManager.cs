@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
+[System.Serializable]
 public class GameManager : MonoBehaviour
 {
+	public enum GameStates {TitleScreen, MainMenu, Options, Game, GameOver, Credits};
+	public GameStates gamestate;
+
 	public int randomSeed;
     //idk why it says to do this at the bottom so I guess we'll find out
     // Prefabs
@@ -12,25 +16,35 @@ public class GameManager : MonoBehaviour
 	public GameObject preAIControllerTank;
     public GameObject preTankPawn;
 	public GameObject hasMapGenerator;
-	public bool daily;
+	public enum MapGenSettings {Random, Custom, Daily};
+	public MapGenSettings mapGenMode;
+	public int customSeed;
+	public bool multiplayer;
+	public int numEnemies;
 
 	public enum Noises {Movement, Shot, Explosion, Hit};
 	//Instances
     //I just feel like this is a better name because it is technically a reference to an object.
-    public Transform playerSpawn;
+    //public Transform playerSpawn;
 
-	//surely I can just use an array for this.
-	//low boundry to high boundry
-	public List<int> mapBoundsX;
-	public List<int> mapBoundsZ;
+	
 	//Misc
+	public int roomSize;
 	public List<PlayerController> listPlayers;
 	public List<Controller> listControllers;
 	public List<Pawn> listPawns;
 	public List<Spawnpoint> listSpawns;
+	public List<Spawnpoint> listPlayerSpawns;
+	public List<Spawnpoint> listEnemySpawns;
+	public List<Spawnpoint> listUsedSpawns;
+	public List<Room> listRooms;
+	public List<GameObject> listActiveCams;
 
 	public List<NoiseMaker> activeNoises;
 
+	//if the controls can be set in a menu they would need to be stored here, for now this will just be used for default controls
+	public List<KeyCode> PlayerOneKeys;
+	public List<KeyCode> PlayerTwoKeys;
     //reference to self
 	public static GameManager inst;
 
@@ -53,58 +67,158 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-		if(daily)
-		{
-			randomSeed = DateToInt(DateTime.Now.Date);
-		} else
-		{
-			randomSeed = DateToInt(DateTime.Now);
-		}
-		UnityEngine.Random.InitState(randomSeed);
-		hasMapGenerator.GetComponent<MapGenerator>().GenerateMap();
+		
 		 //Singleton Check
-        if (inst == null) 
+        if (inst == null || inst == this) 
 		{
             inst = this;
-
+			
             DontDestroyOnLoad(gameObject);
+			switch(mapGenMode)
+			{
+				case MapGenSettings.Random:
+					randomSeed = DateToInt(DateTime.Now);
+					break;
+				case MapGenSettings.Custom:
+					randomSeed = customSeed;
+					break;
+				case MapGenSettings.Daily:
+					randomSeed = DateToInt(DateTime.Now.Date);
+					break;
+			} 
+
+			UnityEngine.Random.InitState(randomSeed);
+			if(hasMapGenerator != null)
+			{
+				hasMapGenerator.GetComponent<MapGenerator>().GenerateMap();
+			}
+			foreach(Spawnpoint currSpawn in listSpawns)
+			{
+			if(currSpawn as PlayerSpawnpoint != null)
+				{
+					Debug.Log("spawnpoint wasnt null");
+					listPlayerSpawns.Add(currSpawn as PlayerSpawnpoint);
+				} else
+				{
+					if(currSpawn as EnemyTankSpawnpoint != null || currSpawn as EnemyDefenderSpawnpoint != null)
+					{
+						listEnemySpawns.Add(currSpawn);
+					}
+				}
+			}
+
+			SpawnPlayer();
+			//if multiplayer, spawn second player, and give them player 2 controls
+			if(multiplayer)
+			{
+				SpawnPlayer();
+				SetPlayerTwoControls(listPlayers[1]);
+			}
+			if(numEnemies < 0)
+			{
+				SpawnAllEnemies();
+			} else
+			{
+				SpawnRandomEnemies();
+			}
+
+			UpdateCams();
         } else 
 		{
 			if(inst != this) 
 			{
 				Destroy(gameObject);	
 			}
-          }
-		SpawnPlayer();
-		SpawnAllEnemies();
-    }
+        }
+	}
+		
 
     // Update is called once per frame
     void Update()
     {
-        
+        //foreach(PlayerController player in listPlayers)
+		//{
+			//player.pawn.roomLocation.roomCamera.SetActive(true);
+		//}
+		if(listActiveCams.Count == 0)
+		{
+			//Debug.Log("updating cams!");
+			UpdateCams();
+		}
+		//realising that camera manager should have been its own object
+		//lesson learned! I think the game manager should exclusively be responsible for storing and organizing information, and any task more complicated than that should be handled by a seperate object.
+		
+
     }
     
     public void SpawnPlayer() 
     {
-        //spawn the player and pawn at spawnpoint
-        GameObject objNewPlayer = Instantiate(prePlayerController, Vector3.zero, Quaternion.identity) as GameObject;
-        GameObject objNewPawn = Instantiate(preTankPawn, playerSpawn.position, playerSpawn.rotation) as GameObject;
-
-        //find the controller and pawn components
-        Controller compController = objNewPlayer.GetComponent<Controller>();
-        Pawn compPawn = objNewPawn.GetComponent<Pawn>();
-
-		//hook controller to pawn
-		compController.pawn = compPawn;
-		compPawn.controller = compController;
+		int randomSpawn = UnityEngine.Random.Range(0, listPlayerSpawns.Count);
+		//keep track of which spawn was used
+        int usedSpawn;
+		//if the randomly chosen spawn has already been used, offset the chosen spawn by 1
+		if(listUsedSpawns.Contains(listPlayerSpawns[randomSpawn]))
+		{
+			//use 0 if it is at the last spawn to prevent out of bounds error
+			if(randomSpawn == listPlayerSpawns.Count - 1)
+			{
+				//spawn the player and pawn at spawnpoint
+				listPlayerSpawns[0].Spawn();
+				usedSpawn = 0;
+			} else
+			{
+				listPlayerSpawns[randomSpawn + 1].Spawn();
+				usedSpawn = randomSpawn + 1;
+			}
+		} else
+		{
+			//spawn the player and pawn at spawnpoint
+			listPlayerSpawns[randomSpawn].Spawn();
+			usedSpawn = randomSpawn;
+		}
+		//add the used spawn to the used spawns array
+		listUsedSpawns.Add(listPlayerSpawns[usedSpawn]);
     }
+
+	public void SetPlayerTwoControls(PlayerController player)
+	{
+	
+	player.moveForwardKey = PlayerTwoKeys[0];
+	player.moveBackwardKey = PlayerTwoKeys[1];
+	player.rotateClockwiseKey = PlayerTwoKeys[2];
+	player.rotateCounterClockwiseKey = PlayerTwoKeys[3];
+
+	player.shootKey = PlayerTwoKeys[4];
+	}
+
+	public void SpawnRandomEnemies()
+	{
+		//ensures that multiple enemies dont use the same spawn
+		List<Spawnpoint> remainingSpawns = new List<Spawnpoint>();
+		foreach(Spawnpoint spawn in listEnemySpawns)
+		{
+			remainingSpawns.Add(spawn);
+		}
+		for(int i = 0; i < numEnemies; i++)
+		{
+			if(remainingSpawns.Count > 0)
+			{
+				int randomSpawn = UnityEngine.Random.Range(0, remainingSpawns.Count);
+				remainingSpawns[randomSpawn].Spawn();
+				remainingSpawns.RemoveAt(randomSpawn);
+			} else
+			{
+				//message for developers :)
+				Debug.Log("Level ran out of spawners! Increase the size of the map, add more spawners to the rooms, or decrease the number of enemies you are trying to spawn");
+			}
+		}
+	}
 
 	public void SpawnAllEnemies()
 	{
-		for(int i = 0; i < listSpawns.Count; i++)
+		for(int i = 0; i < listEnemySpawns.Count; i++)
 		{
-			Spawnpoint currSpawn = listSpawns[i];
+			Spawnpoint currSpawn = listEnemySpawns[i];
 			currSpawn.Spawn();
 		}
 	}
@@ -126,5 +240,81 @@ public class GameManager : MonoBehaviour
 	public int DateToInt ( DateTime dateToUse ) {
      // Add our date up and return it
      return dateToUse.Year + dateToUse.Month + dateToUse.Day + dateToUse.Hour + dateToUse.Minute + dateToUse.Second + dateToUse.Millisecond;
- }
+ 	}
+
+	//since this does a lot of array iterations, it is only called each time a player enters or exits a room's roomtrigger
+	public void UpdateCams() 
+	{
+		//FOUND BUGS
+		/*
+		sometimes player 2 gets control of player 1's camera, fixes when player one moves (?)
+		camera still likes to freak out all the time
+		*/
+		foreach(Room room in listRooms)
+			{
+				room.StopCamera();
+			}
+		//iterate for each player in listPlayers, preparing for splitscreen
+		foreach(PlayerController player in listPlayers)
+		{
+			//initialize variables to the first room to check
+			Room closestRoom = listRooms[0];
+			float closestRoomDist = Vector3.Distance(player.pawn.transform.position, listRooms[0].transform.position);  
+			/*
+			for(int i = 0; i < listRooms.Count; i++)
+			{
+				if(Vector3.Distance(player.pawn.transform.position, listRooms[i].transform.position))
+			}
+			*/
+			//find the closest room by iterating through all of them and storing the closest one found so far
+			foreach(Room room in listRooms)
+			{
+				float currRoomDist = Vector3.Distance(player.pawn.transform.position, room.transform.position);
+				if(currRoomDist < closestRoomDist)
+				{
+					closestRoomDist = currRoomDist;
+					closestRoom = room;
+				}
+			}
+			//enable the cam for the calculated room
+			closestRoom.StartCamera();
+			player.pawn.roomLocation = closestRoom;
+			//inform the camera that it is following this player
+			player.pawn.roomLocation.roomCameraRoomCamera.pawn = player.pawn;
+			Debug.Log("closestRoom is" + closestRoom);
+		}
+		
+		//twin condition: if there are two players, and they are in different rooms
+		
+		if(listPlayers.Count > 1 && listPlayers[0].pawn.roomLocation != listPlayers[1].pawn.roomLocation)
+		{
+			foreach(GameObject camera in listActiveCams)
+			{
+				//Get the RoomCamera
+				RoomCamera currCam = camera.GetComponent<RoomCamera>();
+				//start twin for the RoomCamera
+				currCam.SwapTwin(true);
+				//if the room z of the room of this camera is lower than the z of the camera of the other pawn, this is the left camera, otherwise this is the right camera.
+			}
+			//I will take this as a lesson for the future to not be lazy and update variables for their new purpose as soon as I can, but it is too late now to change this
+			if(listActiveCams[0].GetComponent<RoomCamera>().pawn.roomLocation.z >= listActiveCams[1].GetComponent<RoomCamera>().pawn.roomLocation.z)
+			{
+				listActiveCams[0].GetComponent<RoomCamera>().leftTwin = true;
+				listActiveCams[1].GetComponent<RoomCamera>().leftTwin = false;
+			} else
+			{
+				
+				listActiveCams[0].GetComponent<RoomCamera>().leftTwin = false;
+				listActiveCams[1].GetComponent<RoomCamera>().leftTwin = true;
+			}
+		} else
+		{
+			foreach(GameObject camera in listActiveCams)
+			{
+				RoomCamera currCam = camera.GetComponent<RoomCamera>();
+				currCam.SwapTwin(false);
+			}
+		}
+	}
 }
+

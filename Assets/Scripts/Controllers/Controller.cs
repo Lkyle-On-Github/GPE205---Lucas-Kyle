@@ -5,8 +5,12 @@ using UnityEngine;
 [System.Serializable]
 public class Controller : MonoBehaviour
 {
-    //the pawn instance assigned to this controller, should be initialized when this pawn is spawned
+    //the pawn instance assigned to this controller, should be initialized when this pawn/controller pair is spawned
     public Pawn pawn;
+	public float score;
+	public int lives;
+	public Spawnpoint spawnpoint;
+	public int spawnpointIndex;
 	
 
     // Start is called before the first frame update
@@ -16,8 +20,16 @@ public class Controller : MonoBehaviour
 		{
 				GameManager.inst.listControllers.Add(this);
 		}
+		if (spawnpoint.listSpawnedControllers != null)
+		{
+			//I have to store this because calling it in destroy no worky
+			spawnpointIndex = spawnpoint.listSpawnedControllers.IndexOf(this);
+		}
     }
-
+	public virtual void Awake()
+	{
+		
+	}
     // Update is called once per frame
     public virtual void Update()
     {
@@ -28,10 +40,23 @@ public class Controller : MonoBehaviour
     {
         
     }
+
+	public virtual void GainScore(float points)
+	{
+		score += points;
+		Debug.Log(score);
+	}
 	//the only way I wrote it like this is because I got confused by the description of OnDeath and now I have to keep it cuz it could technically be useful
 	public virtual void OnPawnDeath()
 	{
-		Destroy(gameObject);
+		lives -= 1;
+		if(lives <= 0)
+		{
+			Destroy(gameObject);
+		} else
+		{
+			spawnpoint.Respawn(this);
+		}
 	}
 	public void OnDestroy()
 	{
@@ -39,7 +64,12 @@ public class Controller : MonoBehaviour
 		//Remove from player list
 		if (GameManager.inst.listControllers != null) 
 		{
-				GameManager.inst.listControllers.Remove(this);
+			GameManager.inst.listControllers.Remove(this);
+		}
+		if (spawnpoint.listSpawnedControllers != null)
+		{
+			//make the index null to retain list order
+			spawnpoint.listSpawnedControllers[spawnpointIndex] = null;
 		}
 	}
 }

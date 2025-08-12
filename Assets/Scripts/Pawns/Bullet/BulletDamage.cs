@@ -42,23 +42,25 @@ public class BulletDamage : Damage
 	{
 		//ignores collision in the following cases:
 		//if what it is colliding with is a projectile 
-		Projectile colliderProj = collider.gameObject.GetComponent<Projectile>();
-		if(colliderProj == null) 
-		{
-			
-			//Debug.Log(collider.gameObject);
-			//Debug.Log(proj);
-
-			//if what it is colliding with is it's shooter
-			if(proj.shooter.pawn == null || collider.gameObject != proj.shooter.pawn.gameObject) 
+		//Projectile colliderProj = collider.gameObject.GetComponent<Projectile>();
+		RoomTrigger colliderRT = collider.gameObject.GetComponent<RoomTrigger>();
+		Damage colliderDamage = collider.gameObject.GetComponent<Damage>();
+			if((colliderDamage == null ) || !colliderDamage.damageIgnore) 
 			{
-				//Debug.Log("COLLIDING!!");
-				Attack(collider.gameObject, damage);
+				if(colliderRT == null)
+				{
+					//Debug.Log(collider.gameObject);
+					//Debug.Log(proj);
+
+					//if what it is colliding with is it's shooter
+					if(proj.shooter.pawn == null || collider.gameObject != proj.shooter.pawn.gameObject) 
+					{
+						//Debug.Log("COLLIDING!!");
+						Attack(collider.gameObject, damage, proj.shooter.pawn.damage);
+					}
+					//destroyed on any collision
+					Destroy(gameObject);
+				}
 			}
-			//destroyed on any collision
-			Destroy(gameObject);
-		}
-		
-		
 	}
 }

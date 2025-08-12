@@ -15,7 +15,14 @@ public abstract class Pawn : MonoBehaviour
 	public Damage damage;
 	public Health health;
 	public GameObject leftSide;
+	public GameObject leftAngle;
 	public GameObject rightSide;
+	public GameObject rightAngle;
+	public Room roomLocation;
+	public Damage lastAttacker;
+	public float killScore;
+	public Spawnpoint spawnpoint;
+	public int spawnpointIndex;
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -24,12 +31,19 @@ public abstract class Pawn : MonoBehaviour
 		{
 				GameManager.inst.listPawns.Add(this);
 		}
+		if (spawnpoint.listSpawnedPawns != null)
+		{
+			//I have to store this because calling it in destroy no worky
+			spawnpointIndex = spawnpoint.listSpawnedPawns.IndexOf(this);
+		}
     }
 
     // Update is called once per frame
     public virtual void Update()
     {
 		//I think this doesnt do anything
+		//Debug.Log(spawnpoint.listSpawnedPawns.IndexOf(this));
+		
     }
 
     public abstract void RotateClockwise();
@@ -56,6 +70,13 @@ public abstract class Pawn : MonoBehaviour
 		if (GameManager.inst.listPawns != null) 
 		{
 				GameManager.inst.listPawns.Remove(this);
+				
+		}
+		if (spawnpoint.listSpawnedPawns != null)
+		{
+			//make the index null to retain list order
+			//Debug.Log(spawnpoint.listSpawnedPawns.IndexOf(this));
+			spawnpoint.listSpawnedPawns[spawnpointIndex] = null;
 		}
 	}
 }

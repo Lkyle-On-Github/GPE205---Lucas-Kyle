@@ -76,6 +76,11 @@ public class Shooter : MonoBehaviour
 			}
 	}
 
+	public virtual void BoostDamage(float dmgBoost)
+	{
+		shotDmg += dmgBoost;
+	}
+	
 	public virtual void DefineBullet() 
 	{
 		//Initializes the bullets Proj with the bullet speed and reference to shooter

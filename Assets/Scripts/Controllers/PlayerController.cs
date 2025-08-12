@@ -17,7 +17,7 @@ public class PlayerController : Controller
     {
 		//add self to player list
 	    //I kinda feel like its better if the game crashes with a null reference exception if the gamemanager doesnt exist so that I can read the error message and know what the problem is, since the entire game wouldnt function without the manager anyways.
-		if (GameManager.inst.listPlayers != null) 
+		if (GameManager.inst.listPlayers != null && !GameManager.inst.listPlayers.Contains(this)) 
 		{
 				GameManager.inst.listPlayers.Add(this);
 		}
@@ -26,6 +26,13 @@ public class PlayerController : Controller
 		base.Start();
     }
 
+	public override void Awake()
+	{
+		if (GameManager.inst.listPlayers != null && !GameManager.inst.listPlayers.Contains(this)) 
+		{
+				GameManager.inst.listPlayers.Add(this);
+		}
+	}
     // Update is called once per frame
     public override void Update()
     {   

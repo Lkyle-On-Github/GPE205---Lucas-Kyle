@@ -128,7 +128,7 @@ public class TankAISupport : AIController
 				ToggleSenses(true,false);
 				break;
 			case States.Flee:
-				fleePos = RandomMapPos();
+				fleePos = RandomRoomPos();
 				ToggleSenses(true,false);
 				break;
 			case States.Celebrate:

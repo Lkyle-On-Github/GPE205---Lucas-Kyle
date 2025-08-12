@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class MapGenerator : MonoBehaviour
 {
 	public GameObject[] rooms;
@@ -10,7 +11,7 @@ public class MapGenerator : MonoBehaviour
 	public int mapHeight;
 	public int roomSizeX;
 	public int roomSizeZ;
-	private Room[ , ] mapGrid;
+	public Room[ , ] mapGrid;
     // Start is called before the first frame update
     void Start()
     {
@@ -50,12 +51,15 @@ public class MapGenerator : MonoBehaviour
 
 				//what have I done
 				Room currRoomRoom = currRoom.GetComponent<Room>();
-
+				currRoomRoom.x = currRow;
+				currRoomRoom.z = currColumn;
 				mapGrid[currColumn,currRow] = currRoomRoom;
+				Debug.Log(mapGrid[currColumn,currRow]);
 				InitializeDoors(currColumn, currRow, currRoomRoom);
 			}
 
 		}
+
 	}
 	public void InitializeDoors(int col, int row, Room room)
 	{

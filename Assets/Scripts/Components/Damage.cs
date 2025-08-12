@@ -6,6 +6,7 @@ public class Damage : MonoBehaviour
 {
 	public Health health;
 	public Pawn pawn;
+	public bool damageIgnore;
 
 	//0 is player team, 1 is enemy team
 	public int team;
@@ -41,11 +42,13 @@ public class Damage : MonoBehaviour
 	public virtual void OnHit(Damage attacker, float dmg) 
 	{
 		//Debug.Log(this);
-			this.health.TakeDamage(dmg);
-			if(pawn != null) 
-			{
-				pawn.MakeNoise(GameManager.Noises.Hit);
-			}
+		if(pawn != null) 
+		{
+			pawn.lastAttacker = attacker;
+			pawn.MakeNoise(GameManager.Noises.Hit);
+		}
+		this.health.TakeDamage(dmg);
+			
 			//death check
 			
 	}
@@ -67,7 +70,21 @@ public class Damage : MonoBehaviour
 			//team check, alternate modes of attacking should have their own team check
 			if(targetDamage.team != this.team) 
 			{	
-				targetDamage.OnHit(this,dmg);
+				targetDamage.OnHit(this, dmg);
+				return true;
+			} 
+		}
+		return false;
+	}
+	public bool Attack(GameObject target, float dmg, Damage attacker)
+	{
+		Damage targetDamage = target.GetComponent<Damage>();
+		if(targetDamage != null)
+		{
+			//team check, alternate modes of attacking should have their own team check
+			if(targetDamage.team != this.team) 
+			{	
+				targetDamage.OnHit(attacker, dmg);
 				return true;
 			} 
 		}

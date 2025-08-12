@@ -7,10 +7,12 @@ public class Health : MonoBehaviour
 {
 	public float maxHp;
 	public float hp;
+	public Pawn pawn;
     // Start is called before the first frame update
     void Start()
     {
         //hp = MaxHp;
+		pawn = GetComponent<Pawn>();
     }
 
     // Update is called once per frame
@@ -21,8 +23,12 @@ public class Health : MonoBehaviour
 
 	public virtual void Die() 
 	{
+		//attempt to give the controller that killed this pawn it's score
+		if(pawn != null && pawn.lastAttacker != null && pawn.lastAttacker.pawn != null && pawn.lastAttacker.pawn.controller != null)
+		{
+			pawn.lastAttacker.pawn.controller.GainScore(pawn.killScore);
+		}
 		//check if this is a pawn, and if so inform it's controller
-		Pawn pawn = GetComponent<Pawn>();
 		if(pawn != null) 
 		{
 			//I think this second check has to be inside the first one to prevent null reference exception

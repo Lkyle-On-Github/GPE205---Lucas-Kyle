@@ -31,7 +31,16 @@ public class AIController : Controller
 
 	public enum TurnSetting {None, Clockwise, CounterClockwise};
 	public float moveCheckDist;
-	public TurnSetting chosenDir;
+	public float shortCheckDist;
+	//direction simply used to reduce the number of raycast checks
+	public TurnSetting turnDir;
+	//used to help it navigate around large obstacles
+	public TurnSetting navDir;
+	public float navResetTime;
+	private float lastNavTrigger;
+	private float lastStuckCheckTime;
+	private Vector3 stuckCheckPos;
+
     // Start is called before the first frame update
     public override void Start()
     {
@@ -50,7 +59,12 @@ public class AIController : Controller
         //this only even reduces lag if they all start on different frames right? otherwise it would just be stuttering? I mean I dont really know how lag works so whatever
 		RunSenses();
 
+		if(lastNavTrigger + navResetTime < Time.time)
+		{
+			navDir = TurnSetting.None;
+		}
 		
+		//Debug.Log(pawn.transform.forward);
     }
 
     //public void MakeDecisions()
@@ -261,175 +275,214 @@ public class AIController : Controller
 		pawn.Seek(seekObj);
 	}
 
-	//the big mistake I made with this code was forgetting what turnsetting was and trying to use it as a toggle for what side of the AI the wall is on when that was not its intended purpose, and im not really sure what to do about it except starting over.
+	//completely rewrote it and it works great now!
 	protected virtual void SeekSmart(Vector3 seekPos)
 	{
-		//cache the current facing direction
 		Quaternion cachedQuat = pawn.transform.rotation;
-		RaycastHit hitInfoLeft;
-		RaycastHit hitInfoRight;
-		RaycastHit hitInfo;
-		//rotate the pawn
+		Vector3 cachedForward = pawn.transform.forward;
+		Vector3 cachedPos = pawn.transform.position;
 		pawn.RotateTowardsPoint(seekPos);
-
-		Vector3 calcPawnPos = pawn.transform.position;
 		
-		//I think this is unused
-		switch(chosenDir)
-						{
-							case TurnSetting.Clockwise:
-								calcPawnPos = pawn.leftSide.transform.position;
-								break;
-							case TurnSetting.CounterClockwise:
-								calcPawnPos = pawn.rightSide.transform.position;
-								break;
-						}
-		int hitCounter = 0;
-		bool hitLeft = Physics.Raycast(pawn.transform.position, pawn.leftSide.transform.forward, out hitInfoLeft, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
-		bool hitRight = Physics.Raycast(pawn.transform.position, pawn.rightSide.transform.forward, out hitInfoRight, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
-		if(hitLeft && hitInfoLeft.transform.gameObject.GetComponent<Pawn>() == null)
+		RaycastHit hitInfo;
+		//initial rayCast check
+		bool didHit = Physics.Raycast(pawn.transform.position, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+		switch(turnDir)
 		{
-			hitInfo = hitInfoLeft;
-			calcPawnPos = pawn.leftSide.transform.position;
-			hitCounter += 1;
-		}
-		if(hitRight && hitInfoRight.transform.gameObject.GetComponent<Pawn>() == null)
-		{
-			hitInfo = hitInfoRight;
-			calcPawnPos = pawn.rightSide.transform.position;
-			hitCounter += 1;
-		}
-		
-		
-		//check if it hit anything
-		//Debug.Log(Physics.Raycast(calcPawnPos, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal));
-		if(Physics.Raycast(calcPawnPos, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal))
-		{
-			//check if that hit was a pawn
-			if(hitInfo.transform.gameObject.GetComponent<Pawn>() == null)
-			{
-				//if it isnt already turning away, that means it might be turning in to a wall
-				
-				switch(chosenDir)
+			case TurnSetting.None:
+				//Debug.Log(hitInfo.transform.gameObject);
+			
+				if(DidHitWall(didHit, hitInfo))
+				{
+					//it might be turning in to a wall, check if the original rotation would be turning in to a wall
+					
+					didHit = Physics.Raycast(pawn.transform.position, cachedForward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+					if(DidHitWall(didHit, hitInfo)) 
+					{
+						//why is the code reaching here while it is out in the open
+						//Debug.Log("didhitwall!!!");
+						pawn.transform.rotation = cachedQuat;
+						//this means it isnt turning towards a wall, it is just facing a wall. decide which direction to turn to face away from the wall.
+						//if it already has its navDir set, use that
+						switch(navDir)
 						{
 							case TurnSetting.None:
-								//if it hasn't, check if the original angle was facing the wall
-								if(Physics.Raycast(calcPawnPos, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal))
+								Vector3 filteredTargetPos = new Vector3(seekPos.x, this.transform.position.y, seekPos.z);
+								//find the vector and rotation to target
+								Vector3 vectorToTarget = filteredTargetPos - transform.position;
+								Quaternion rotToTarget = Quaternion.LookRotation(vectorToTarget, Vector3.up);
+								//So I did some testing and thinking and I believe the way it works is that , if the target y rot is bigger, go clockwise, smaller go counterclockwise, and if the difference is > 180, flip the answer
+								//the only problem with this is that if the AI's rotation is set outside of the -180 to 180 range this wont work, but I just wont do that so its fine!
+								if(pawn.transform.rotation.y - rotToTarget.y > 0)
 								{
-									//check if that hit was a pawn
-									if(hitInfo.transform.gameObject.GetComponent<Pawn>() != null)
-									{
-										//since it doesnt want to turn away from the player, it shouldnt turn away from pawns
-										//the cache does not need to be used, and turning does not need to be initiated
-									} else
-									{
-										//if the previous direction and turn direction are both towards the wall, it needs assistance turning away from the wall
-										//reset to cached angle
-										pawn.transform.rotation = cachedQuat;
-										
-										
-										//decide which direction to turn
-										//I have come up with two solutions, and both of them require stored values but this one should go towards the target more consistently
-										// Filter out the target's y position.
-										Vector3 filteredTargetPos = new Vector3(seekPos.x, this.transform.position.y, seekPos.z);
-										//find the vector and rotation to target
-										Vector3 vectorToTarget = filteredTargetPos - transform.position;
-										Quaternion rotToTarget = Quaternion.LookRotation(vectorToTarget, Vector3.up);
-										//So I did some testing and thinking and I believe the way it works is that , if the target y rot is bigger, go clockwise, smaller go counterclockwise, and if the difference is > 180, flip the answer
-										//the only problem with this is that if the AI's rotation is set outside of the -180 to 180 range this wont work, but I just wont do that so its fine!
-										if(pawn.transform.rotation.y - rotToTarget.y > 0)
-										{
-											
-											chosenDir = TurnSetting.Clockwise;
-										} else
-										{
-											chosenDir = TurnSetting.CounterClockwise;
-											
-										} 
-										if(pawn.transform.rotation.y - rotToTarget.y > 180 || pawn.transform.rotation.y - rotToTarget.y < -180) 
-										{
-											//chosenDir = !chosenDir; 
-										
-											//damn it
-											if(chosenDir == TurnSetting.Clockwise) 
-											{
-												chosenDir = TurnSetting.CounterClockwise;
-											} else 
-											{
-												chosenDir = TurnSetting.Clockwise;
-											}
-										}
-
-									}
+									turnDir = TurnSetting.Clockwise;
+									navDir = TurnSetting.Clockwise;
+									lastNavTrigger = Time.time;
 								} else
 								{
-									//the original angle wasnt a wall, so it must be trying to turn into a wall
-									//return back to cached value
-									pawn.transform.rotation = cachedQuat;
-									//disable turning
-									//chosenDir = TurnSetting.None;
+									turnDir = TurnSetting.CounterClockwise;
+									navDir = TurnSetting.CounterClockwise;
+									lastNavTrigger = Time.time;
+								}
+								if(pawn.transform.rotation.y - rotToTarget.y > 180 || pawn.transform.rotation.y - rotToTarget.y < -180) 
+								{
+									//chosenDir = !chosenDir; 
+									//damn it
+									if(turnDir == TurnSetting.Clockwise) 
+									{
+										turnDir = TurnSetting.CounterClockwise;
+									} else 
+									{
+										turnDir = TurnSetting.Clockwise;
+									}
 								}
 								break;
-							//it is already turning away, keep turning
-
-
 							case TurnSetting.Clockwise:
-								pawn.transform.rotation = cachedQuat;
-								pawn.RotateClockwise();
+								//if it was trailing a wall, and its about to turn into a wall, that means it hit a corner! reverse turning direction
+
+								turnDir = TurnSetting.Clockwise;
+								//if the wall in front is very close, this check is to prevent it from seeing doorways as corners
+								didHit = Physics.Raycast(pawn.transform.position, pawn.leftAngle.transform.forward, out hitInfo, moveCheckDist * 1.1f, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+								if(DidHitWall(didHit, hitInfo))
+								{
+									//if it is perpendicular to a wall that is in its turning direction
+									didHit = Physics.Raycast(pawn.transform.position, pawn.rightSide.transform.forward, out hitInfo, shortCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);	
+									if(DidHitWall(didHit,hitInfo))
+									{
+										turnDir = TurnSetting.CounterClockwise;
+										//pawn.RotateCounterClockwise();
+									}
+								}
 								break;
 							case TurnSetting.CounterClockwise:
-								pawn.transform.rotation = cachedQuat;
-								pawn.RotateCounterClockwise();
+								turnDir = TurnSetting.CounterClockwise;
+								didHit = Physics.Raycast(pawn.transform.position, pawn.rightAngle.transform.forward, out hitInfo, moveCheckDist * 1.1f, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+								if(DidHitWall(didHit, hitInfo))
+								{
+									didHit = Physics.Raycast(pawn.transform.position, pawn.leftSide.transform.forward, out hitInfo, shortCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);	
+									if(DidHitWall(didHit,hitInfo))
+									{
+										turnDir = TurnSetting.Clockwise;
+										//pawn.RotateClockwise();
+									}
+								}
 								break;
 						}
-				
-				
+					} else
+					{
+						//this means it is turning in to a wall, so it should just turn back
+						if(Vector3.SignedAngle(cachedForward, pawn.transform.forward, Vector3.up) > 0)
+						{
+							navDir = TurnSetting.Clockwise;
+							lastNavTrigger = Time.time;
+						} else
+						{
+							navDir = TurnSetting.CounterClockwise;
+							lastNavTrigger = Time.time;
+						}
 
+						pawn.transform.rotation = cachedQuat;
+						//set navDir to the direction of this turn
+						//we dont have the direction of this turn :(((
+						
+					}
+				} else
+				{
+					//movement was uninterrupted!!
+					
+				}
+				break;
+			case TurnSetting.Clockwise:
+				if(DidHitWall(didHit, hitInfo))
+				{
+					//it still needs to be turning, continue in chosen rotate direction
+					pawn.transform.rotation = cachedQuat;
+					pawn.RotateClockwise();
+				} else
+				{
+					//it doesnt need to be turning anymore, return to normal movement
+					//Debug.Log("didnt hit wall!");
+					turnDir = TurnSetting.None;
+				}
+				break;
+			case TurnSetting.CounterClockwise:
+				if(DidHitWall(didHit, hitInfo))
+				{
+					//it still needs to be turning, continue in chosen rotate direction
+					pawn.transform.rotation = cachedQuat;
+					pawn.RotateCounterClockwise();
+				} else
+				{
+					//it doesnt need to be turning anymore, return to normal movement
+					//Debug.Log("didnt hit wall!");
+					turnDir = TurnSetting.None;
+				}
+				break;
+
+		}
+		//move forward regardless of everything
+		pawn.MoveForward();
+		//fix for getting stuck on corners
+		DoStuckCheck();
+		
+	}
+	protected virtual bool DidHitWall(bool didHit, RaycastHit hitInfo)
+	{
+		if(didHit)
+		{
+			//this should be impossible but it appears to be whats causing the no turning bug
+			if(hitInfo.transform.gameObject != null)
+			{
+				if(hitInfo.transform.gameObject.GetComponent<Pawn>() == null)
+				{
+					return true;
+				} else 
+				{
+					return false;
+				}
 			} else
 			{
-				//it is facing a pawn, so it doesnt need to turn
-				//Disable turning setting
-				//chosenDir = TurnSetting.None;
+				return false;
 			}
 		} else
 		{
-			//if it didnt hit anything, then its all good
-			//neither raycast hit anything, disable turning
-			if(hitCounter == 0)
-			{
-				
-				if(!Physics.Raycast(pawn.transform.position, pawn.transform.forward, out hitInfo, moveCheckDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal) || hitInfo.transform.gameObject.GetComponent<Pawn>() == null)
-				{
-					//Debug.Log("dangit");
-					switch(chosenDir)
-					{
-						case TurnSetting.Clockwise:
-								pawn.transform.rotation = cachedQuat;
-								pawn.RotateClockwise();
-								break;
-							case TurnSetting.CounterClockwise:
-								pawn.transform.rotation = cachedQuat;
-								pawn.RotateCounterClockwise();
-								break;
-					}
-					chosenDir = TurnSetting.None;
-				}
-			}
-			//Disable turning setting
-			//chosenDir = TurnSetting.None;
+			return false;
 		}
-			//if it didnt hit anything, then the turn is good
-		//move forward regardless of whether or not it hit
-		pawn.MoveForward();
-		//modify move speed?
-		//I tested and the turn speed is fast enough to move away from an obstacle before it runs into it, so this shouldnt be necessary
+	}
 
-		//this code shouldnt be able to avoid corners.
+	protected virtual void DoStuckCheck()
+	{
+		if(lastStuckCheckTime + 1 < Time.time)
+		{
+			if(Vector3.Distance(pawn.transform.position, stuckCheckPos) < 0.001f && turnDir == TurnSetting.None)
+			{
+				Debug.Log("unstucking!");
+				pawn.RotateClockwise();
+			}
+			stuckCheckPos = pawn.transform.position;
+			lastStuckCheckTime = Time.time;
+		}
+	}
+
+
+
+	protected virtual Vector3 RandomRoomPos()
+	{
+		//get a valid position in the pawn's current room
+		int randomX = UnityEngine.Random.Range(-20,20) + pawn.roomLocation.x * 50;
+		int randomZ = UnityEngine.Random.Range(-20,20) + pawn.roomLocation.z * 50;
+		//return
+		return new Vector3(randomX, pawn.transform.position.y, randomZ);
 	}
 
 	protected virtual Vector3 RandomMapPos()
 	{
-		return new Vector3(Random.Range(GameManager.inst.mapBoundsX[0], GameManager.inst.mapBoundsX[1]), 0, Random.Range(GameManager.inst.mapBoundsZ[0], GameManager.inst.mapBoundsZ[1]));
+		//return a random room from roomList
+		Room randomRoom = GameManager.inst.listRooms[UnityEngine.Random.Range(0, GameManager.inst.listRooms.Count)];
+		//get a random valid position in the room
+		int randomX = UnityEngine.Random.Range(-20,20) + randomRoom.x * 50;
+		int randomZ = UnityEngine.Random.Range(-20,20) + randomRoom.z * 50;
+		//return
+		return new Vector3(randomX, pawn.transform.position.y, randomZ);
 	}
 
 	//code that the AI will execute on every sense update

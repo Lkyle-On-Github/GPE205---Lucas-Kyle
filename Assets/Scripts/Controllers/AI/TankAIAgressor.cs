@@ -133,7 +133,7 @@ public class TankAIAgressor : AIController
 	protected virtual void StartNewWander()
 	{
 		subStateWander = true;
-		wanderPos = RandomMapPos();
+		wanderPos = RandomRoomPos();
 	}
 	protected virtual void EndWander()
 	{

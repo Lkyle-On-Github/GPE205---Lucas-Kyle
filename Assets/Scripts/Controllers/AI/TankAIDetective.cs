@@ -38,7 +38,7 @@ public class TankAIDetective : AIController
 				SeekSmart(wanderPos);
 				if(DistanceCheck(wanderPos, wanderDist))
 				{
-					wanderPos = RandomMapPos();
+					wanderPos = RandomRoomPos();
 				}
 			//state change check
 				//in sense check.
@@ -50,7 +50,7 @@ public class TankAIDetective : AIController
 				{
 					if(PointVisible(targetNoisePos))
 					{
-					wanderPos = RandomMapPos();
+					wanderPos = RandomRoomPos();
 					SwapState(States.Idle);
 					}
 				}

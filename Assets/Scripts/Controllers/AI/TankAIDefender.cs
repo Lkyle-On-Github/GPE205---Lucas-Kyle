@@ -14,11 +14,13 @@ public class TankAIDefender : AIController
 	public bool subStateRotate;
 	//innefficient way to do this
 	public float rotatedDegrees;
+	public int spawnRoomX;
+	public int spawnRoomZ;
+	public bool spawnRoomGotten;
 
 	public Pawn target;
 	void Start()
     {
-		UpdatePatrol(0);
 		//perhaps I should make this pick the closest player?
         target = GameManager.inst.listPlayers[0].pawn;
 		SwapState(States.Patrol);
@@ -124,8 +126,9 @@ public class TankAIDefender : AIController
 	}
 	protected virtual void UpdatePatrol(int point)
 	{
+		
 		patrolPoint = point;
-		patrolPos = patrolPoints[point];
+		patrolPos = (patrolPoints[point] + new Vector3(spawnRoomX * GameManager.inst.roomSize, 0 , spawnRoomZ * GameManager.inst.roomSize));
 	}
 
 	protected override void OnSenseUpdate()
@@ -164,31 +167,43 @@ public class TankAIDefender : AIController
 
 	protected virtual void DoPatrolState()
 	{
-		if(subStateRotate)
+		if(spawnRoomGotten)
 		{
-			Vector3 startAng = pawn.transform.forward;
-			RotateClockwise();
-			//I think this measures in full rotations rather than degrees but im not changing the name
-			if (rotatedDegrees > 360)
+			if(subStateRotate)
 			{
-				subStateRotate = false;
-				NextPatrolPoint();
-			}
-			else
+				Vector3 startAng = pawn.transform.forward;
+				RotateClockwise();
+				//I think this measures in full rotations rather than degrees but im not changing the name
+				if (rotatedDegrees > 360)
+				{
+					subStateRotate = false;
+					NextPatrolPoint();
+				}
+				else
+				{
+					rotatedDegrees += Vector3.Angle(startAng, pawn.transform.forward);
+				}
+			} else
 			{
-				rotatedDegrees += Vector3.Angle(startAng, pawn.transform.forward);
+				if (DistanceCheck(patrolPos, 1.5f))
+				{
+					subStateRotate = true;
+					rotateStart = pawn.transform.rotation.y;
+				}
+				else
+				{
+					SeekSmart(patrolPos);
+					rotatedDegrees = 0;
+				}
 			}
 		} else
 		{
-			if (DistanceCheck(patrolPos, 1.5f))
+			if(pawn.roomLocation != null)
 			{
-				subStateRotate = true;
-				rotateStart = pawn.transform.rotation.y;
-			}
-			else
-			{
-				SeekSmart(patrolPos);
-				rotatedDegrees = 0;
+				spawnRoomGotten = true;
+				spawnRoomX = pawn.roomLocation.x;
+				spawnRoomZ = pawn.roomLocation.z;
+				UpdatePatrol(0);
 			}
 		}
 	}
