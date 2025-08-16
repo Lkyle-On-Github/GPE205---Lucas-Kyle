@@ -5,6 +5,7 @@ using UnityEngine;
 public class ScoreBoost : MonoBehaviour
 {
 	public float value;
+	public AudioClip audioClip;
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +26,7 @@ public class ScoreBoost : MonoBehaviour
 		//only a player can get a score pickup
 		if(colliderPawn != null && GameManager.inst.listPlayers.Contains(colliderPawn.controller as PlayerController))
 		{
+			GameManager.inst.SpawnSoundEffect(audioClip, transform.position);
 			colliderPawn.controller.GainScore(value);
 			Destroy(this.gameObject);
 		}

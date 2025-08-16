@@ -112,6 +112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawner: {fileID: 0}
+  audioClip: {fileID: 8300000, guid: e5210d1d7ed647143af6354ef484cf24, type: 3}
   powerup:
     duration: 5
     isPermanent: 0

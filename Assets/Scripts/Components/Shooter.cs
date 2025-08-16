@@ -56,7 +56,7 @@ public class Shooter : MonoBehaviour
     }
 
 	//since other bullets might want to fire differently, this function is specific to the tank bullet, but is in the Shooter class so that any shooter could fire it.
-	public virtual void FireTankBullet(int team)
+	public virtual bool FireTankBullet(int team)
 	{
 		if(fireTime + fireDelay < Time.time) 
 		{
@@ -73,7 +73,9 @@ public class Shooter : MonoBehaviour
 			bulletProj.Shoot(fireForce);
 			
 			//objectNewBullet.
+			return true;
 			}
+		return false;
 	}
 
 	public virtual void BoostDamage(float dmgBoost)

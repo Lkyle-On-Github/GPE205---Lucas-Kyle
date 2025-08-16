@@ -44,26 +44,28 @@ public class PlayerController : Controller
 
     public override void ProcessInputs()
     {
+		if(GameManager.inst.gameState == GameManager.GameStates.Game)
+		{
+			//while opposite directions would likely cancel out, I think doing it like that may cause some problems with things like inertia and it would be better to just make the inputs exclusive.
+			if (Input.GetKey(moveForwardKey) && !Input.GetKey(moveBackwardKey))
+			{
+				pawn.MoveForward();
+			} else if (Input.GetKey(moveBackwardKey))
+			{
+				pawn.MoveBackward();
+			}
 
-        //while opposite directions would likely cancel out, I think doing it like that may cause some problems with things like inertia and it would be better to just make the inputs exclusive.
-        if (Input.GetKey(moveForwardKey) && !Input.GetKey(moveBackwardKey))
-        {
-            pawn.MoveForward();
-        } else if (Input.GetKey(moveBackwardKey))
-        {
-            pawn.MoveBackward();
-        }
+			if (Input.GetKey(rotateClockwiseKey) && !Input.GetKey(rotateCounterClockwiseKey)) 
+			{
+				pawn.RotateClockwise();
+			} else if (Input.GetKey(rotateCounterClockwiseKey)) 
+			{
+				pawn.RotateCounterClockwise();
+			}
 
-        if (Input.GetKey(rotateClockwiseKey) && !Input.GetKey(rotateCounterClockwiseKey)) 
-        {
-            pawn.RotateClockwise();
-        } else if (Input.GetKey(rotateCounterClockwiseKey)) 
-        {
-            pawn.RotateCounterClockwise();
-        }
-
-		if(Input.GetKeyDown(shootKey)) {
-			pawn.Shoot();
+			if(Input.GetKeyDown(shootKey)) {
+				pawn.Shoot();
+			}
 		}
     }
 

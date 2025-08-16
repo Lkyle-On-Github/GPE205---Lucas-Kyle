@@ -36,7 +36,9 @@ public class Health : MonoBehaviour
 			{
 				pawn.controller.OnPawnDeath();
 			}
+			GameManager.inst.SpawnSoundEffect(pawn.deathSound, transform.position);
 		}
+		
 		Destroy(gameObject);
 	}
 

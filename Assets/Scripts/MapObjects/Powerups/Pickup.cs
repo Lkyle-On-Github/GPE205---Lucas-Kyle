@@ -5,10 +5,11 @@ using UnityEngine;
 public class Pickup : MonoBehaviour
 {
 	public PowerupSpawner spawner;
+	public AudioClip audioClip;
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -21,7 +22,7 @@ public class Pickup : MonoBehaviour
 	{
 		if(spawner != null)
 		{
-		spawner.OnPowerupDestroyed();
+			spawner.OnPowerupDestroyed();
 		}
 	}
 }

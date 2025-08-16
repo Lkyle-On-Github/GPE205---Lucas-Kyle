@@ -10,5 +10,9 @@ public class ShotNoisemaker : NoiseMaker
 		base.Start();
         noise = GameManager.Noises.Shot;
     }
-
+	public override void StartNoise(Vector3 location)
+	{
+		base.StartNoise(location);
+		audioSource.Play();
+	}
 }

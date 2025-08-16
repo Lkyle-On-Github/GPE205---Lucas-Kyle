@@ -7,7 +7,8 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
 	public enum GameStates {TitleScreen, MainMenu, Options, Game, GameOver, Credits};
-	public GameStates gamestate;
+	public GameStates gameState;
+	public float lastStateSwapTime;
 
 	public int randomSeed;
     //idk why it says to do this at the bottom so I guess we'll find out
@@ -15,12 +16,16 @@ public class GameManager : MonoBehaviour
     public GameObject prePlayerController;
 	public GameObject preAIControllerTank;
     public GameObject preTankPawn;
+	public GameObject preTempSFXObject;
 	public GameObject hasMapGenerator;
 	public enum MapGenSettings {Random, Custom, Daily};
 	public MapGenSettings mapGenMode;
 	public int customSeed;
+	//used to disable the generation options after game has started
+	public bool hasGenerated;
 	public bool multiplayer;
 	public int numEnemies;
+	
 
 	public enum Noises {Movement, Shot, Explosion, Hit};
 	//Instances
@@ -48,6 +53,7 @@ public class GameManager : MonoBehaviour
     //reference to self
 	public static GameManager inst;
 
+	public GameObject defaultSFXAudioSource;
     private void Awake() 
     {
         //Singleton Check
@@ -90,7 +96,16 @@ public class GameManager : MonoBehaviour
 			UnityEngine.Random.InitState(randomSeed);
 			if(hasMapGenerator != null)
 			{
-				hasMapGenerator.GetComponent<MapGenerator>().GenerateMap();
+				if(hasMapGenerator.GetComponent<MapGenerator>() != null)
+				{
+					hasMapGenerator.GetComponent<MapGenerator>().GenerateMap();
+				} else
+				{
+					Debug.Log("The object assigned as the map generator does not have the MapGenerator component.");
+				}
+			} else
+			{
+				Debug.Log("Assign an object with the MapGenerator component and set hasMapGenerator in the GameManager to generate a map");
 			}
 			foreach(Spawnpoint currSpawn in listSpawns)
 			{
@@ -315,6 +330,74 @@ public class GameManager : MonoBehaviour
 				currCam.SwapTwin(false);
 			}
 		}
+	}
+	//TitleScreen, MainMenu, Options, Game, GameOver, Credits
+	protected virtual void StateStart() 
+	{
+		//this is how I write my switch statements it makes it easier for me to read but I can change it if you really need me to
+		switch (gameState)
+		{
+			case GameStates.TitleScreen:
+
+				break;
+			case GameStates.MainMenu:
+
+				break;
+			case GameStates.Options:
+
+				break;
+			case GameStates.Game:
+
+				break;
+			case GameStates.GameOver:
+
+				break;
+			case GameStates.Credits:
+
+				break;
+		}
+	}
+	protected virtual void StateEnd()
+	{
+		switch (gameState)
+		{
+			case GameStates.TitleScreen:
+
+				break;
+			case GameStates.MainMenu:
+
+				break;
+			case GameStates.Options:
+
+				break;
+			case GameStates.Game:
+
+				break;
+			case GameStates.GameOver:
+
+				break;
+			case GameStates.Credits:
+
+				break;
+		}
+	}
+	public virtual void SwapState(GameStates newState)
+	{
+		if(gameState != newState)
+		{
+		StateEnd();
+		gameState = newState;
+		StateStart();
+
+		lastStateSwapTime = Time.time;
+		}
+	}
+
+	//GENERAL UTILITY FUNCTIONS
+	public virtual void SpawnSoundEffect(AudioClip audioClip, Vector3 pos)
+	{
+		GameObject currSFXObj = Instantiate(preTempSFXObject, pos, Quaternion.identity) as GameObject;
+		currSFXObj.GetComponent<AudioSource>().clip = audioClip;
 	}
 }
 

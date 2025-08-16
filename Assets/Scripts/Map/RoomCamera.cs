@@ -13,7 +13,8 @@ public class RoomCamera : MonoBehaviour
 	public bool leftTwin;
 	//the position it goes to during normal state
 	private Vector3 basePosition;
-
+	float twinX;
+	public float twinClamp;
 	public Pawn pawn;
     // Start is called before the first frame update
     void Start()
@@ -43,7 +44,8 @@ public class RoomCamera : MonoBehaviour
 	public virtual void DoTwinState()
 	{
 		//transform.position = new Vector3 (pawn.transform.position.x - transform.parent.position.x, transform.position.y, transform.position.z);
-		transform.position = new Vector3 (pawn.transform.position.x, transform.position.y, transform.position.z);
+		twinX = Mathf.Clamp(pawn.transform.position.x, basePosition.x - twinClamp, basePosition.x + twinClamp);
+		transform.position = new Vector3 (twinX, transform.position.y, transform.position.z);
 		if(leftTwin)
 		{
 			cam.rect = new Rect(0f,0f,0.4995f,1);
@@ -64,13 +66,6 @@ public class RoomCamera : MonoBehaviour
 		{
 			isTwin = true;
 			//transform.position.x = pawn.transform.position.x - transform.parent.position.x; 
-			foreach(PlayerController player in GameManager.inst.listPlayers)
-			{
-				if(player.pawn.roomLocation = room)
-				{
-					pawn = player.pawn;
-				}
-			}
 			//cam.aspect = 8/9f;
 			//cam.rect = new Rect(0f,0f,0.5f,1);
 		} else

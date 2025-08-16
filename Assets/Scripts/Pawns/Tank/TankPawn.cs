@@ -15,6 +15,7 @@ public class TankPawn : Pawn
 	NoiseMaker shotNoisemaker;
 	NoiseMaker hitNoisemaker;
 
+
     // Start is called before the first frame update
     public override void Start()
     {
@@ -115,5 +116,11 @@ public class TankPawn : Pawn
 				hitNoisemaker.StartNoise(transform.position);
 				break;
 		}
+	}
+
+	public override void OnDestroy()
+	{
+		base.OnDestroy();
+		
 	}
 }

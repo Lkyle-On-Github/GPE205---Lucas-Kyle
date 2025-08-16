@@ -5,6 +5,8 @@ using UnityEngine;
 public class Healthpack : MonoBehaviour
 {
 	public float dealtHealing;
+	public AudioClip audioClip;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -19,6 +21,7 @@ public class Healthpack : MonoBehaviour
 
 	void OnTriggerEnter(Collider collider)
 	{
+		GameManager.inst.SpawnSoundEffect(audioClip, transform.position);
 		Health colliderHealth = collider.gameObject.GetComponent<Health>();
 		//Debug.Log(colliderHealth != null);
 		if(colliderHealth != null)

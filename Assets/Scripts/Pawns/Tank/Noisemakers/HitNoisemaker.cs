@@ -10,5 +10,13 @@ public class HitNoisemaker : NoiseMaker
 		base.Start();
         noise = GameManager.Noises.Hit;
     }
-
+	public override void StartNoise(Vector3 location)
+	{
+		base.StartNoise(location);
+		//prevents noise playing at the same time as death noise, although i dont think that would even happen
+		if (GetComponent<Health>().hp > 0)
+		{
+			audioSource.Play();
+		}
+	}
 }

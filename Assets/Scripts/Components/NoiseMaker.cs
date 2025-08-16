@@ -1,4 +1,4 @@
-using System.Collections;
+	using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 //using inst;
@@ -22,16 +22,29 @@ public class NoiseMaker : MonoBehaviour
 	public Vector3 noiseLocation;
 	public bool NoPawn;
 	public Pawn pawn;
+	public AudioSource audioSource;
+	public AudioClip audioClip;
 
 
     // Start is called before the first frame update
     public virtual void Start()
     {
+		
+		
 		if(!NoPawn)
 		{
        		pawn = GetComponent<Pawn>();
 		}
+		//creates a copy of the default audio source because I didnt want to have 3 audio sources in every single tank prefab I thought it was yucky
+		audioSource = GameObject.Instantiate(GameManager.inst.defaultSFXAudioSource, transform).GetComponent<AudioSource>();
+		audioSource.clip = audioClip;
     }
+	/*
+	public virtual void Awake()
+	{
+		audio = new AudioSource();
+	}
+	*/
 
     // Update is called once per frame
     void Update()

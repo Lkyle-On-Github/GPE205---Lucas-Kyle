@@ -16,7 +16,7 @@ public class RoomFloor : MonoBehaviour
     {
         
     }
-
+	/*
 	public void OnCollisionStay(Collision collisionInfo)
 	{
 		Pawn collidingPawn = collisionInfo.gameObject.GetComponent<Pawn>();
@@ -41,4 +41,5 @@ public class RoomFloor : MonoBehaviour
 			}
 		}
 	}
+	*/
 }

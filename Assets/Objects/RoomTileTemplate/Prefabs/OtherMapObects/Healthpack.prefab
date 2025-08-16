@@ -169,3 +169,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dealtHealing: 4
+  audioClip: {fileID: 8300000, guid: e5210d1d7ed647143af6354ef484cf24, type: 3}

@@ -23,6 +23,7 @@ public abstract class Pawn : MonoBehaviour
 	public float killScore;
 	public Spawnpoint spawnpoint;
 	public int spawnpointIndex;
+	public AudioClip deathSound;
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -41,6 +42,7 @@ public abstract class Pawn : MonoBehaviour
     // Update is called once per frame
     public virtual void Update()
     {
+		//lastPosition = transform.position;
 		//I think this doesnt do anything
 		//Debug.Log(spawnpoint.listSpawnedPawns.IndexOf(this));
 		
@@ -63,7 +65,7 @@ public abstract class Pawn : MonoBehaviour
 	public abstract void MakeNoise(GameManager.Noises noise);
 	
     
-	public void OnDestroy()
+	public virtual void OnDestroy()
 	{
 
 		//Remove from player list

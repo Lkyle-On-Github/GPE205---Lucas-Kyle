@@ -17,9 +17,13 @@ public class TankShooter : Shooter
         
     }
 	*/
-	public override void FireTankBullet(int team)
+	public override bool FireTankBullet(int team)
 	{
-		base.FireTankBullet(team);
-		pawn.MakeNoise(GameManager.Noises.Shot);
+		if(base.FireTankBullet(team))
+		{
+			pawn.MakeNoise(GameManager.Noises.Shot);
+			return true;
+		}
+		return false;
 	}
 }
