@@ -68,7 +68,7 @@ public abstract class Pawn : MonoBehaviour
 	public virtual void OnDestroy()
 	{
 
-		//Remove from player list
+		//Remove from pawn list
 		if (GameManager.inst.listPawns != null) 
 		{
 				GameManager.inst.listPawns.Remove(this);

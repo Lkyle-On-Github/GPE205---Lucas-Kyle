@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEngine.Audio;
 
 [System.Serializable]
 public class GameManager : MonoBehaviour
@@ -53,7 +54,11 @@ public class GameManager : MonoBehaviour
     //reference to self
 	public static GameManager inst;
 
+	public SettingsInput settingsInput;
 	public GameObject defaultSFXAudioSource;
+
+	public AudioMixer gameMixer;
+	
     private void Awake() 
     {
         //Singleton Check
@@ -80,64 +85,7 @@ public class GameManager : MonoBehaviour
             inst = this;
 			
             DontDestroyOnLoad(gameObject);
-			switch(mapGenMode)
-			{
-				case MapGenSettings.Random:
-					randomSeed = DateToInt(DateTime.Now);
-					break;
-				case MapGenSettings.Custom:
-					randomSeed = customSeed;
-					break;
-				case MapGenSettings.Daily:
-					randomSeed = DateToInt(DateTime.Now.Date);
-					break;
-			} 
-
-			UnityEngine.Random.InitState(randomSeed);
-			if(hasMapGenerator != null)
-			{
-				if(hasMapGenerator.GetComponent<MapGenerator>() != null)
-				{
-					hasMapGenerator.GetComponent<MapGenerator>().GenerateMap();
-				} else
-				{
-					Debug.Log("The object assigned as the map generator does not have the MapGenerator component.");
-				}
-			} else
-			{
-				Debug.Log("Assign an object with the MapGenerator component and set hasMapGenerator in the GameManager to generate a map");
-			}
-			foreach(Spawnpoint currSpawn in listSpawns)
-			{
-			if(currSpawn as PlayerSpawnpoint != null)
-				{
-					Debug.Log("spawnpoint wasnt null");
-					listPlayerSpawns.Add(currSpawn as PlayerSpawnpoint);
-				} else
-				{
-					if(currSpawn as EnemyTankSpawnpoint != null || currSpawn as EnemyDefenderSpawnpoint != null)
-					{
-						listEnemySpawns.Add(currSpawn);
-					}
-				}
-			}
-
-			SpawnPlayer();
-			//if multiplayer, spawn second player, and give them player 2 controls
-			if(multiplayer)
-			{
-				SpawnPlayer();
-				SetPlayerTwoControls(listPlayers[1]);
-			}
-			if(numEnemies < 0)
-			{
-				SpawnAllEnemies();
-			} else
-			{
-				SpawnRandomEnemies();
-			}
-
-			UpdateCams();
+			
         } else 
 		{
 			if(inst != this) 
@@ -151,11 +99,30 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+		if(gameState == GameStates.Options)
+		{
+		//
+			float masterVolume = InterpretVolume(settingsInput.masterSlider.value);
+			float sfxVolume = InterpretVolume(settingsInput.soundSlider.value);
+			float musicVolume = InterpretVolume(settingsInput.musicSlider.value);
+			gameMixer.SetFloat("MasterVolume", masterVolume);
+			gameMixer.SetFloat("SFXVolume", sfxVolume);
+			gameMixer.SetFloat("MusicVolume", musicVolume);
+			//Debug.Log(masterVolume);
+			//Debug.Log(sfxVolume);
+			//Debug.Log(musicVolume);
+		//
+		}
+		
+		//gameMixer.GetFloat("Master", masterVolume);
+		//gameMixer.GetFloat("SFX", sfxVolume);
+		//gameMixer.GetFloat("Music", musicVolume);
+		
         //foreach(PlayerController player in listPlayers)
 		//{
 			//player.pawn.roomLocation.roomCamera.SetActive(true);
 		//}
-		if(listActiveCams.Count == 0)
+		if(listActiveCams.Count == 0 && hasMapGenerator.GetComponent<MapGenerator>().mapExists)
 		{
 			//Debug.Log("updating cams!");
 			UpdateCams();
@@ -166,6 +133,18 @@ public class GameManager : MonoBehaviour
 
     }
     
+	public float InterpretVolume(float sliderPos)
+	{
+		if (sliderPos <= 0) {
+            // If we are at zero, set our volume to the lowest value
+            return -80;
+        } else {
+            // We are >0, so start by finding the log10 value 
+            float posValue = Mathf.Log10(sliderPos);
+            // Make it in the 0-20db range (instead of 0-1 db)
+            return (posValue * 20);
+        }
+	}
     public void SpawnPlayer() 
     {
 		int randomSpawn = UnityEngine.Random.Range(0, listPlayerSpawns.Count);
@@ -257,6 +236,111 @@ public class GameManager : MonoBehaviour
      return dateToUse.Year + dateToUse.Month + dateToUse.Day + dateToUse.Hour + dateToUse.Minute + dateToUse.Second + dateToUse.Millisecond;
  	}
 
+	public void RunMapGeneration()
+	{
+		SyncMapGenSettings();
+		switch(mapGenMode)
+			{
+				case MapGenSettings.Random:
+					randomSeed = DateToInt(DateTime.Now);
+					break;
+				case MapGenSettings.Custom:
+					randomSeed = customSeed;
+					break;
+				case MapGenSettings.Daily:
+					randomSeed = DateToInt(DateTime.Now.Date);
+					break;
+			} 
+			
+			UnityEngine.Random.InitState(randomSeed);
+			if(hasMapGenerator != null)
+			{
+				if(hasMapGenerator.GetComponent<MapGenerator>() != null)
+				{
+					hasMapGenerator.GetComponent<MapGenerator>().GenerateMap();
+				} else
+				{
+					Debug.Log("The object assigned as the map generator does not have the MapGenerator component.");
+				}
+			} else
+			{
+				Debug.Log("Assign an object with the MapGenerator component and set hasMapGenerator in the GameManager to generate a map");
+			}
+			foreach(Spawnpoint currSpawn in listSpawns)
+			{
+			if(currSpawn as PlayerSpawnpoint != null)
+				{
+					//Debug.Log("spawnpoint wasnt null");
+					listPlayerSpawns.Add(currSpawn as PlayerSpawnpoint);
+				} else
+				{
+					if(currSpawn as EnemyTankSpawnpoint != null || currSpawn as EnemyDefenderSpawnpoint != null)
+					{
+						listEnemySpawns.Add(currSpawn);
+					}
+				}
+			}
+
+			SpawnPlayer();
+			//if multiplayer, spawn second player, and give them player 2 controls
+			if(multiplayer)
+			{
+				SpawnPlayer();
+				SetPlayerTwoControls(listPlayers[1]);
+			}
+			if(numEnemies < 0)
+			{
+				SpawnAllEnemies();
+			} else
+			{
+				SpawnRandomEnemies();
+			}
+
+			UpdateCams();
+	}
+
+	public void RunMapDestruction()
+	{
+		DeletePairs();
+		hasMapGenerator.GetComponent<MapGenerator>().DeleteMap();
+	}
+
+	public void SyncMapGenSettings()
+	{
+		if(settingsInput.seededCheckBox.isOn)
+		{
+			mapGenMode = MapGenSettings.Custom;
+			if(settingsInput.seededInputField.text != null)
+			{
+				customSeed = int.Parse(settingsInput.seededInputField.text);
+			} else
+			{
+				//sets the seed to 0 if nothing is entered
+				customSeed = 0;
+			}
+		} else
+		{
+			if(settingsInput.dailyCheckBox.isOn)
+			{
+				mapGenMode = MapGenSettings.Daily;
+			} else
+			{
+				mapGenMode = MapGenSettings.Random;
+			}
+		}
+	}
+	public void DeletePairs()
+	{
+		foreach (Pawn pawn in listPawns)
+		{
+			Destroy(pawn.gameObject);
+		}
+		foreach (Controller controller in listControllers)
+		{
+			Destroy(controller.gameObject);
+		}
+	}
+
 	//since this does a lot of array iterations, it is only called each time a player enters or exits a room's roomtrigger
 	public void UpdateCams() 
 	{
@@ -344,10 +428,13 @@ public class GameManager : MonoBehaviour
 
 				break;
 			case GameStates.Options:
-
+				//RunMapDestruction();
 				break;
 			case GameStates.Game:
-
+				if(!hasMapGenerator.GetComponent<MapGenerator>().mapExists)
+				{
+					RunMapGeneration();
+				}
 				break;
 			case GameStates.GameOver:
 

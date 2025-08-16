@@ -73,7 +73,6 @@ public class Buttons : MonoBehaviour
 	public void StartButton()
 	{
 		GameManager.inst.multiplayer = false;
-		GameManager.inst.SwapState(GameManager.GameStates.Game);
 		SwapState(MenuStates.Game, false);
 		//DisableBackButton();
 	}
@@ -81,7 +80,6 @@ public class Buttons : MonoBehaviour
 	public void MultiplayerButton()
 	{
 		GameManager.inst.multiplayer = true;
-		GameManager.inst.SwapState(GameManager.GameStates.Game);
 		SwapState(MenuStates.Game, false);
 	}
 
@@ -96,15 +94,22 @@ public class Buttons : MonoBehaviour
 	{
 		//EnableBackButton();
 		settingsScreen.SetActive(true);
+		GameManager.inst.SwapState(GameManager.GameStates.Options);
 		SwapState(MenuStates.Settings, true);
 		DisableButtons(menuButtonObjects);
 	}
 
 	public void BackButton()
 	{
-		
-		EnableButtons(menuButtonObjects);
+		if(returnState != MenuStates.Game)
+		{
+			EnableButtons(menuButtonObjects);
+		} else
+		{
+			settingsButtonObject.SetActive(true);
+		}
 		SwapState(returnState, false);
+		//
 		DisableBackButton();
 		
 	}
@@ -128,9 +133,10 @@ public class Buttons : MonoBehaviour
 				creditsScreen.gameObject.SetActive(true);
 				break;
 			case MenuStates.Settings:
-
+				
 				break;
 			case MenuStates.Game:
+				GameManager.inst.SwapState(GameManager.GameStates.Game);
 				DisableButtons(new List<GameObject>{startButtonObject, multiplayerButtonObject, creditsButtonObject});
 				break;
 		}

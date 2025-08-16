@@ -6,6 +6,7 @@ using UnityEngine;
 public class MapGenerator : MonoBehaviour
 {
 	public GameObject[] rooms;
+	public bool mapExists;
 	//measured in rooms
 	public int mapWidth;
 	public int mapHeight;
@@ -15,7 +16,7 @@ public class MapGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        mapExists = false;
     }
 
     // Update is called once per frame
@@ -29,36 +30,42 @@ public class MapGenerator : MonoBehaviour
 
 	public void GenerateMap()
 	{
-		//Debug.Log("Generating map!");
-		mapGrid = new Room[mapWidth, mapHeight];
-
-		for(int currRow = 0; currRow < mapHeight; currRow++ )
+		if(!mapExists)
 		{
-			for(int currColumn = 0; currColumn < mapWidth; currColumn++)
+			//Debug.Log("Generating map!");
+			mapGrid = new Room[mapWidth, mapHeight];
+
+			for(int currRow = 0; currRow < mapHeight; currRow++ )
 			{
-				//prepare the rooms position
-				float currRoomX = currRow * roomSizeX;
-				float currRoomZ = currColumn * roomSizeZ;
-				Vector3 currRoomPos = new Vector3(currRoomX, 0.0f, currRoomZ);
-				//choose a random room and place it
-				GameObject currRoom = Instantiate(GetRandomRoom(), currRoomPos, Quaternion.identity) as GameObject;
+				for(int currColumn = 0; currColumn < mapWidth; currColumn++)
+				{
+					//prepare the rooms position
+					float currRoomX = currRow * roomSizeX;
+					float currRoomZ = currColumn * roomSizeZ;
+					Vector3 currRoomPos = new Vector3(currRoomX, 0.0f, currRoomZ);
+					//choose a random room and place it
+					GameObject currRoom = Instantiate(GetRandomRoom(), currRoomPos, Quaternion.identity) as GameObject;
 
-				//center the room on the generator
-				//I dont think it will be centered actually which I dont like
-				currRoom.transform.parent = this.transform;
-				//Allow identification of the room
-				currRoom.name = "Room_" +currColumn+","+currRow;
+					//center the room on the generator
+					//I dont think it will be centered actually which I dont like
+					currRoom.transform.parent = this.transform;
+					//Allow identification of the room
+					currRoom.name = "Room_" +currColumn+","+currRow;
 
-				//what have I done
-				Room currRoomRoom = currRoom.GetComponent<Room>();
-				currRoomRoom.x = currRow;
-				currRoomRoom.z = currColumn;
-				mapGrid[currColumn,currRow] = currRoomRoom;
-				Debug.Log(mapGrid[currColumn,currRow]);
-				InitializeDoors(currColumn, currRow, currRoomRoom);
+					//what have I done
+					Room currRoomRoom = currRoom.GetComponent<Room>();
+					currRoomRoom.x = currRow;
+					currRoomRoom.z = currColumn;
+					mapGrid[currColumn,currRow] = currRoomRoom;
+					//oDebug.Log(mapGrid[currColumn,currRow]);
+					InitializeDoors(currColumn, currRow, currRoomRoom);
+				}
 			}
-
+		} else
+		{
+			Debug.Log("A map already exists!");
 		}
+		mapExists = true;
 
 	}
 	public void InitializeDoors(int col, int row, Room room)
@@ -80,8 +87,14 @@ public class MapGenerator : MonoBehaviour
 			Destroy(room.doorEast);
 		}
 	}
-	public void IsInMapBounds()
-	{
 
+	public void DeleteMap()
+	{
+		mapExists = false;
+		foreach (Room room in mapGrid)
+		{
+			Destroy(room.gameObject);
+		}
+		
 	}
 }

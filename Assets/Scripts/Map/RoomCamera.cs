@@ -75,4 +75,15 @@ public class RoomCamera : MonoBehaviour
 			cam.rect = new Rect(0f,0f,1,1);
 		}
 	}
+
+	public void OnDestroy()
+	{
+		if(GameManager.inst.listActiveCams != null)
+			{
+				if(GameManager.inst.listActiveCams.Contains(this.gameObject))
+				{
+					GameManager.inst.listActiveCams.Remove(this.gameObject);
+				}
+			}
+	}
 }

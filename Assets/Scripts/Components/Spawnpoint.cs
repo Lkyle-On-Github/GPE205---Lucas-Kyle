@@ -108,10 +108,25 @@ public class Spawnpoint : MonoBehaviour
 	public void OnDestroy()
 	{
 
-		//Remove from player list
+		//Remove from all pawn lists
 		if (GameManager.inst.listSpawns != null) 
 		{
-				GameManager.inst.listSpawns.Remove(this);
+			GameManager.inst.listSpawns.Remove(this);
+			
+		}
+		if(GameManager.inst.listUsedSpawns != null && GameManager.inst.listUsedSpawns.Contains(this))
+		{
+				GameManager.inst.listUsedSpawns.Remove(this);
+		}
+		if (GameManager.inst.listEnemySpawns != null && GameManager.inst.listEnemySpawns.Contains(this))
+		{
+			GameManager.inst.listEnemySpawns.Remove(this);
+		} else
+		{
+			if (GameManager.inst.listPlayerSpawns != null && GameManager.inst.listPlayerSpawns.Contains(this))
+			{
+				GameManager.inst.listPlayerSpawns.Remove(this);
+			}
 		}
 	}
 }

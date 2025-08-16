@@ -48,4 +48,12 @@ public class PowerupSpawner : MonoBehaviour
 		spawnReadyTime = (Time.time + spawnDelay);
 		spawnReady = true;
 	}
+
+	public void OnDestroy()
+	{
+		if(GameManager.inst.hasMapGenerator != null && !GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().mapExists)
+		{
+			Destroy(powerupInst);
+		}
+	}
 }
