@@ -76,10 +76,10 @@ public class LivesDisplay : MonoBehaviour
 	{
 		if(left)
 		{
-			transform.localPosition = new Vector3(-262, -190, 0);
+			transform.localPosition = new Vector3(-214, -190, 0);
 		} else
 		{
-			transform.localPosition = new Vector3(262, -190, 0);
+			transform.localPosition = new Vector3(214, -190, 0);
 		}
 	}
 }

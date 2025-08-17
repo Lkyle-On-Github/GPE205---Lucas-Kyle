@@ -43,15 +43,18 @@ public class RoomCamera : MonoBehaviour
 
 	public virtual void DoTwinState()
 	{
-		//transform.position = new Vector3 (pawn.transform.position.x - transform.parent.position.x, transform.position.y, transform.position.z);
-		twinX = Mathf.Clamp(pawn.transform.position.x, basePosition.x - twinClamp, basePosition.x + twinClamp);
-		transform.position = new Vector3 (twinX, transform.position.y, transform.position.z);
-		if(leftTwin)
+		if(pawn != null)
 		{
-			cam.rect = new Rect(0f,0f,0.4995f,1);
-		} else
-		{
-			cam.rect = new Rect(0.5005f,0f,0.4995f,1);
+			//transform.position = new Vector3 (pawn.transform.position.x - transform.parent.position.x, transform.position.y, transform.position.z);
+			twinX = Mathf.Clamp(pawn.transform.position.x, basePosition.x - twinClamp, basePosition.x + twinClamp);
+			transform.position = new Vector3 (twinX, transform.position.y, transform.position.z);
+			if(leftTwin)
+			{
+				cam.rect = new Rect(0f,0f,0.4995f,1);
+			} else
+			{
+				cam.rect = new Rect(0.5005f,0f,0.4995f,1);
+			}
 		}
 	}
 

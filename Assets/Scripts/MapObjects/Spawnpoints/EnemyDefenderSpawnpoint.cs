@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyDefenderSpawnpoint : Spawnpoint
+public class EnemyDefenderSpawnpoint : EnemyTankSpawnpoint
 {
 	//public GameObject controllerDefender;
 	public List<Vector3> patrolPoints;

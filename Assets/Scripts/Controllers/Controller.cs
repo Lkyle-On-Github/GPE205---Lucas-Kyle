@@ -47,7 +47,7 @@ public class Controller : MonoBehaviour
 		score += points;
 		//Debug.Log(score);
 	}
-	//the only way I wrote it like this is because I got confused by the description of OnDeath and now I have to keep it cuz it could technically be useful
+	//I was not confused by the description of OnDeath and it is useful.
 	public virtual void OnPawnDeath()
 	{
 		lives -= 1;
@@ -88,6 +88,11 @@ public class Controller : MonoBehaviour
 
 	public virtual void OnPawnRespawn()
 	{
-		
+		if(pawn.spawnpoint == null)
+		{
+			pawn.spawnpoint = spawnpoint;
+			pawn.spawnpointIndex = spawnpointIndex;
+			Debug.Log("pawn spawnpoint wasn't set properly! correcting values, but the list may not be updated correctly");
+		}
 	}
 }

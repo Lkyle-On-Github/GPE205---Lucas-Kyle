@@ -32,7 +32,7 @@ public class PowerupSpawner : MonoBehaviour
 	{
 		//spawns the powerup, sets its spawner, and disables spawning.
 		spawnReady = false;
-		powerupInst = Instantiate(powerup, this.transform.position, this.transform.rotation) as GameObject;
+		powerupInst = Instantiate(powerup, this.transform) as GameObject;
 		powerupInst.GetComponent<Pickup>().spawner = this;
 		if(!infSpawns)
 		{

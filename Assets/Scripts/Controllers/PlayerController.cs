@@ -14,6 +14,7 @@ public class PlayerController : Controller
 	public KeyCode shootKey;
 
 	public int playerID;
+	public bool isRespawing;
     // Start is called before the first frame update
     public override void Start()
     {
@@ -73,13 +74,24 @@ public class PlayerController : Controller
 
 	public override void OnPawnDeath()
 	{
-		base.OnPawnDeath();
+		lives -= 1;
+		if(lives <= 0)
+		{
+			Destroy(gameObject);
+		} else
+		{
+			isRespawing = true;
+			spawnpoint.Respawn(this);
+		}
 		uiHandler.LoseLife();
 	}
 
 	public override void OnPawnRespawn()
 	{
+		//Debug.Log("pawn respawn was called");
+		GameManager.inst.UpdateCams();
 		GameManager.inst.ColorPlayer(playerID, pawn);
+		isRespawing = false;
 	}
 
 	public override void GainScore(float toGain)

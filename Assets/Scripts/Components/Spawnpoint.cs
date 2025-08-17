@@ -116,15 +116,18 @@ public class Spawnpoint : MonoBehaviour
 		}
 		if(GameManager.inst.listUsedSpawns != null && GameManager.inst.listUsedSpawns.Contains(this))
 		{
-				GameManager.inst.listUsedSpawns.Remove(this);
+			Debug.Log("removing used spawn!");
+			GameManager.inst.listUsedSpawns.Remove(this);
 		}
 		if (GameManager.inst.listEnemySpawns != null && GameManager.inst.listEnemySpawns.Contains(this))
 		{
+			Debug.Log("removing enemy spawn!");
 			GameManager.inst.listEnemySpawns.Remove(this);
 		} else
 		{
 			if (GameManager.inst.listPlayerSpawns != null && GameManager.inst.listPlayerSpawns.Contains(this))
 			{
+				Debug.Log("removing player spawn!");
 				GameManager.inst.listPlayerSpawns.Remove(this);
 			}
 		}

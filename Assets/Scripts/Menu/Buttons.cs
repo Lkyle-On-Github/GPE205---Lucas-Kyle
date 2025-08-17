@@ -120,6 +120,7 @@ public class Buttons : MonoBehaviour
 	{
 		//swapping from gameover state will delete the level, and swapping gamemanager to game state will generate a new level.
 		SwapState(MenuStates.Game, false);
+		settingsButtonObject.SetActive(true);
 	}
 
 	public void MenuButton()
@@ -144,6 +145,7 @@ public class Buttons : MonoBehaviour
 				break;
 			case MenuStates.Main:
 				EnableButtons(menuButtonObjects);
+				GameManager.inst.SwapState(GameManager.GameStates.MainMenu);
 				break;
 			case MenuStates.Credits:
 				creditsScreen.gameObject.SetActive(true);

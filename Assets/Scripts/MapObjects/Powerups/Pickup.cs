@@ -20,7 +20,7 @@ public class Pickup : MonoBehaviour
 
 	public void OnDestroy()
 	{
-		if(spawner != null && GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().mapExists)
+		if(spawner != null &&  GameManager.inst != null && GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().mapExists)
 		{
 			spawner.OnPowerupDestroyed();
 		}

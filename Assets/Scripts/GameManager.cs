@@ -23,13 +23,14 @@ public class GameManager : MonoBehaviour
 	public enum MapGenSettings {Random, Custom, Daily};
 	public MapGenSettings mapGenMode;
 	public int customSeed;
-	//used to disable the generation options after game has started
-	public bool hasGenerated;
+	//wasnt sure what else to call it, used in RunMapGeneration to ensure custom seeds work properly, set true in GameOver and false in MainMenu.
+	public bool gameOverFlag;
 	public bool multiplayer;
 	public int numEnemies;
 
 	public float earnedScore;
 	
+	public UnityEngine.Random.State randomState;
 
 	public enum Noises {Movement, Shot, Explosion, Hit};
 	//Instances
@@ -259,6 +260,7 @@ public class GameManager : MonoBehaviour
      return dateToUse.Year + dateToUse.Month + dateToUse.Day + dateToUse.Hour + dateToUse.Minute + dateToUse.Second + dateToUse.Millisecond;
  	}
 
+	//custom and daily should behave differently if they arent run from the menu
 	public void RunMapGeneration()
 	{
 		SyncMapGenSettings();
@@ -266,16 +268,34 @@ public class GameManager : MonoBehaviour
 			{
 				case MapGenSettings.Random:
 					randomSeed = DateToInt(DateTime.Now);
+					UnityEngine.Random.InitState(randomSeed);
 					break;
 				case MapGenSettings.Custom:
-					randomSeed = customSeed;
+					if(!gameOverFlag)
+					{
+						randomSeed = customSeed;
+						UnityEngine.Random.InitState(randomSeed);
+						randomState = UnityEngine.Random.state;
+					} else
+					{
+						Debug.Log("attempting to reuse seed");
+						UnityEngine.Random.state = randomState;
+					}
 					break;
 				case MapGenSettings.Daily:
-					randomSeed = DateToInt(DateTime.Now.Date);
+					if(!gameOverFlag)
+					{
+						randomSeed = DateToInt(DateTime.Now.Date);
+						UnityEngine.Random.InitState(randomSeed);
+						randomState = UnityEngine.Random.state;
+					} else
+					{
+						UnityEngine.Random.state = randomState;
+					}
 					break;
 			} 
 			
-			UnityEngine.Random.InitState(randomSeed);
+			
 			if(hasMapGenerator != null)
 			{
 				if(hasMapGenerator.GetComponent<MapGenerator>() != null)
@@ -291,13 +311,15 @@ public class GameManager : MonoBehaviour
 			}
 			foreach(Spawnpoint currSpawn in listSpawns)
 			{
+				//compile list of player spawnpoints
 			if(currSpawn as PlayerSpawnpoint != null)
 				{
 					//Debug.Log("spawnpoint wasnt null");
 					listPlayerSpawns.Add(currSpawn as PlayerSpawnpoint);
 				} else
 				{
-					if(currSpawn as EnemyTankSpawnpoint != null || currSpawn as EnemyDefenderSpawnpoint != null)
+					//if it doesnt count as a player spawnpoint, check if is an enemy spawnpoint and add it to that list instead
+					if(currSpawn as EnemyTankSpawnpoint != null)
 					{
 						listEnemySpawns.Add(currSpawn);
 					}
@@ -333,6 +355,10 @@ public class GameManager : MonoBehaviour
 	{
 		DeletePairs();
 		hasMapGenerator.GetComponent<MapGenerator>().DeleteMap();
+		//I had to cave
+		listSpawns.Clear();
+		listEnemySpawns.Clear();
+		listPlayerSpawns.Clear();
 	}
 
 	public void SyncMapGenSettings()
@@ -340,7 +366,7 @@ public class GameManager : MonoBehaviour
 		if(settingsInput.seededCheckBox.isOn)
 		{
 			mapGenMode = MapGenSettings.Custom;
-			if(settingsInput.seededInputField.text != null)
+			if(settingsInput.seededInputField.text != "")
 			{
 				customSeed = int.Parse(settingsInput.seededInputField.text);
 			} else
@@ -409,27 +435,41 @@ public class GameManager : MonoBehaviour
 		}
 		
 		//twin condition: if there are two players, and they are in different rooms
-		
-		if(listPlayers.Count > 1 && listPlayers[0].pawn.roomLocation != listPlayers[1].pawn.roomLocation)
+		//if a player is respawning, skip this frame of twin execution
+		if(listPlayers.Count > 1)
 		{
-			foreach(GameObject camera in listActiveCams)
+			if(!(listPlayers[0].isRespawing || listPlayers[1].isRespawing))
 			{
-				//Get the RoomCamera
-				RoomCamera currCam = camera.GetComponent<RoomCamera>();
-				//start twin for the RoomCamera
-				currCam.SwapTwin(true);
-				//if the room z of the room of this camera is lower than the z of the camera of the other pawn, this is the left camera, otherwise this is the right camera.
-			}
-			//I will take this as a lesson for the future to not be lazy and update variables for their new purpose as soon as I can, but it is too late now to change this
-			if(listActiveCams[0].GetComponent<RoomCamera>().pawn.roomLocation.z >= listActiveCams[1].GetComponent<RoomCamera>().pawn.roomLocation.z)
-			{
-				listActiveCams[0].GetComponent<RoomCamera>().leftTwin = true;
-				listActiveCams[1].GetComponent<RoomCamera>().leftTwin = false;
-			} else
-			{
-				
-				listActiveCams[0].GetComponent<RoomCamera>().leftTwin = false;
-				listActiveCams[1].GetComponent<RoomCamera>().leftTwin = true;
+				if(listPlayers[0].pawn.roomLocation != listPlayers[1].pawn.roomLocation)
+				{
+					foreach(GameObject camera in listActiveCams)
+					{
+						//Get the RoomCamera
+						RoomCamera currCam = camera.GetComponent<RoomCamera>();
+						//start twin for the RoomCamera
+						currCam.SwapTwin(true);
+						//if the room z of the room of this camera is lower than the z of the camera of the other pawn, this is the left camera, otherwise this is the right camera.
+					}
+					//I will take this as a lesson for the future to not be lazy and update variables for their new purpose as soon as I can, but it is too late now to change this
+					if(listActiveCams[0].GetComponent<RoomCamera>().pawn.roomLocation.x <= listActiveCams[1].GetComponent<RoomCamera>().pawn.roomLocation.x)
+					{
+						listActiveCams[0].GetComponent<RoomCamera>().leftTwin = true;
+						listActiveCams[1].GetComponent<RoomCamera>().leftTwin = false;
+					} else
+					{
+						
+						listActiveCams[0].GetComponent<RoomCamera>().leftTwin = false;
+						listActiveCams[1].GetComponent<RoomCamera>().leftTwin = true;
+					}
+				} else
+				{
+					//there is only one camera, set it to default settings.
+					foreach(GameObject camera in listActiveCams)
+					{
+						RoomCamera currCam = camera.GetComponent<RoomCamera>();
+						currCam.SwapTwin(false);
+					}
+				}
 			}
 		} else
 		{
@@ -444,7 +484,7 @@ public class GameManager : MonoBehaviour
 
 	public void OverrideUIPositions()
 	{
-		Debug.Log("doing override!");
+		//Debug.Log("doing override!");
 		//sets the first player or solo player to the left side, and the other player to the right side by default
 		foreach(PlayerController player in listPlayers)
 		{
@@ -468,7 +508,7 @@ public class GameManager : MonoBehaviour
 
 				break;
 			case GameStates.MainMenu:
-
+				gameOverFlag = false;
 				break;
 			case GameStates.Options:
 				//RunMapDestruction();
@@ -481,7 +521,7 @@ public class GameManager : MonoBehaviour
 				}
 				break;
 			case GameStates.GameOver:
-
+				gameOverFlag = true;
 				break;
 			case GameStates.Credits:
 
@@ -502,7 +542,10 @@ public class GameManager : MonoBehaviour
 
 				break;
 			case GameStates.Game:
-				hudController.gameObject.SetActive(false);
+				if(hudController != null)
+				{
+					hudController.gameObject.SetActive(false);
+				}
 				break;
 			case GameStates.GameOver:
 
@@ -538,7 +581,20 @@ public class GameManager : MonoBehaviour
 			SwapState(GameStates.GameOver);
 			menuHandler.SwapState(Buttons.MenuStates.GameOver, false);
 			menuHandler.gameOverScore.text = new string("Total Score: " + earnedScore);
+		} else
+		{
+			UpdateCams();
 		}
 	}
 }
 
+/*
+	Debug notes: 
+	game appears to restart correctly, but on the second restart the map fails to load
+	playercontroller exists with no pawn
+	I should make sure it gets deleted on the first restart
+	it does
+	hmm
+	rereading spawn code to see if respawn is missing anything
+
+*/
