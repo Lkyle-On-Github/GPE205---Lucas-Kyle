@@ -12,6 +12,8 @@ public class PlayerController : Controller
     public KeyCode rotateCounterClockwiseKey;
 
 	public KeyCode shootKey;
+
+	public int playerID;
     // Start is called before the first frame update
     public override void Start()
     {
@@ -69,14 +71,50 @@ public class PlayerController : Controller
 		}
     }
 
+	public override void OnPawnDeath()
+	{
+		base.OnPawnDeath();
+		uiHandler.LoseLife();
+	}
+
+	public override void OnPawnRespawn()
+	{
+		GameManager.inst.ColorPlayer(playerID, pawn);
+	}
+
+	public override void GainScore(float toGain)
+	{
+		base.GainScore(toGain);
+		uiHandler.UpdateScore(score);
+	}
+
 	public void OnDestroy()
 	{
-
-		//Remove from player list
-		if (GameManager.inst.listPlayers != null) 
+		if(GameManager.inst != null)
 		{
-				GameManager.inst.listPlayers.Remove(this);
+			
+			//Add score to total
+			GameManager.inst.earnedScore += score;
+			//Remove from player list
+			if (GameManager.inst.listPlayers != null) 
+			{
+					GameManager.inst.listPlayers.Remove(this);
+			}
+			GameManager.inst.OnPlayerDeath();
+			base.OnDestroy();
 		}
-		base.OnDestroy();
+	}
+
+	public void BindDisplay (PlayerUI playerUI)
+	{
+		uiHandler.boundUI = playerUI;
+		playerUI.gameObject.SetActive(true);
+		uiHandler.BindDisplay();
+		DisplayDefaultValues();
+	}
+
+	public void DisplayDefaultValues()
+	{
+		uiHandler.DisplayDefaultValues();
 	}
 }

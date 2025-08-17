@@ -79,7 +79,7 @@ public class Spawnpoint : MonoBehaviour
 
 		Damage damage = objNewPawn.GetComponent<Damage>();
 		damage.team = team;
-
+		controller.OnPawnRespawn();
 		//if it is being respawned from the same spawnpoint it used before, insert the pawn in the same point in the array as the controller. Otherwise, put them both at the end of the array
 		if(listSpawnedControllers.Contains(controller)) 
 		{

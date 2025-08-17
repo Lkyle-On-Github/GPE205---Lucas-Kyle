@@ -13,7 +13,14 @@ public class Health : MonoBehaviour
     {
         //hp = MaxHp;
 		pawn = GetComponent<Pawn>();
+		UpdateHealthBar();
     }
+
+	void Awake()
+	{
+		pawn = GetComponent<Pawn>();
+		
+	}
 
     // Update is called once per frame
     void Update()
@@ -46,6 +53,7 @@ public class Health : MonoBehaviour
 	{
 		hp -= dmg;
 		MaxHpCheck();
+		UpdateHealthBar();
 		if(hp <= 0) 
 		{
 			Die();
@@ -56,6 +64,7 @@ public class Health : MonoBehaviour
 	{
 		hp += healing;
 		MaxHpCheck();
+		UpdateHealthBar();
 		if(hp <= 0) 
 		{
 			Die();
@@ -66,5 +75,22 @@ public class Health : MonoBehaviour
 	public virtual void MaxHpCheck()
 	{
 		hp = Mathf.Clamp(hp, 0, maxHp);
+	}
+
+	public virtual void UpdateHealthBar()
+	{
+		if(pawn.healthDisplay != null)
+		{
+			pawn.healthDisplay.SetHealth(hp);
+		} else
+		{
+			if(pawn.controller.FetchHealthDisplay())
+			{
+				pawn.healthDisplay.SetHealth(hp);
+			}  else
+			{
+				Debug.Log("No health display could be found in the pawn's controller");
+			}
+		}
 	}
 }

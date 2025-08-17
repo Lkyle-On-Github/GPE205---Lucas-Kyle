@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class PlayerUI : MonoBehaviour
+public class HUDController : MonoBehaviour
 {
-	public GameObject scoreObj;
-	public GameObject suffsTableObj;
-	public GameObject livesObj;
-	public GameObject healthObj;
+	public PlayerUI p1UI;
+	public PlayerUI p2UI;
+	public Text defaultText;
     // Start is called before the first frame update
     void Start()
     {

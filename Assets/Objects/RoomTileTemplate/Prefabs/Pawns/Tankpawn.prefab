@@ -222,6 +222,7 @@ MonoBehaviour:
   spawnpoint: {fileID: 0}
   spawnpointIndex: 0
   deathSound: {fileID: 8300000, guid: 2036a72e05204b8408e38287018a577b, type: 3}
+  ourple: {fileID: 2100000, guid: 181f316149a6fe647999f2003c68b2f3, type: 2}
 --- !u!114 &4174105782389612921
 MonoBehaviour:
   m_ObjectHideFlags: 0

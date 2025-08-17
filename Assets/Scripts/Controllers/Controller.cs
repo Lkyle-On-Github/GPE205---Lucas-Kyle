@@ -12,7 +12,8 @@ public class Controller : MonoBehaviour
 	public Spawnpoint spawnpoint;
 	public int spawnpointIndex;
 	
-
+	public UIHandler uiHandler;
+	
     // Start is called before the first frame update
     public virtual void Start()
     {
@@ -44,7 +45,7 @@ public class Controller : MonoBehaviour
 	public virtual void GainScore(float points)
 	{
 		score += points;
-		Debug.Log(score);
+		//Debug.Log(score);
 	}
 	//the only way I wrote it like this is because I got confused by the description of OnDeath and now I have to keep it cuz it could technically be useful
 	public virtual void OnPawnDeath()
@@ -71,5 +72,22 @@ public class Controller : MonoBehaviour
 			//make the index null to retain list order
 			spawnpoint.listSpawnedControllers[spawnpointIndex] = null;
 		}
+	}
+
+	public bool FetchHealthDisplay()
+	{
+		if(uiHandler != null && uiHandler.healthDisplay != null)
+		{
+			pawn.healthDisplay = uiHandler.healthDisplay;
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
+
+	public virtual void OnPawnRespawn()
+	{
+		
 	}
 }

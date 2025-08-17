@@ -14,8 +14,10 @@ public class Buttons : MonoBehaviour
 	public GameObject titleScreen;
 	public GameObject creditsScreen;
 	public GameObject settingsScreen;
+	public GameObject gameOverScreen;
+	public Text gameOverScore;
 
-	public enum MenuStates {Title, Main, Credits, Settings, Game};
+	public enum MenuStates {Title, Main, Credits, Settings, Game, GameOver};
 	public MenuStates menuState;
 	private MenuStates returnState;
 
@@ -114,6 +116,20 @@ public class Buttons : MonoBehaviour
 		
 	}
 
+	public void RestartButton()
+	{
+		//swapping from gameover state will delete the level, and swapping gamemanager to game state will generate a new level.
+		SwapState(MenuStates.Game, false);
+	}
+
+	public void MenuButton()
+	{
+		SwapState(MenuStates.Main, false);
+		//swapping from gameover state deletes the level.
+	}
+
+	
+
 //I should have put the state machine for the menu in a different script, lesson learned.
 	protected virtual void StateStart() 
 	{
@@ -139,6 +155,10 @@ public class Buttons : MonoBehaviour
 				GameManager.inst.SwapState(GameManager.GameStates.Game);
 				DisableButtons(new List<GameObject>{startButtonObject, multiplayerButtonObject, creditsButtonObject});
 				break;
+			case MenuStates.GameOver:
+				settingsButtonObject.SetActive(false);
+				gameOverScreen.gameObject.SetActive(true);
+				break;
 		}
 	}
 	protected virtual void StateEnd()
@@ -162,6 +182,10 @@ public class Buttons : MonoBehaviour
 			case MenuStates.Game:
 
 				break;
+			case MenuStates.GameOver:
+				gameOverScreen.gameObject.SetActive(false);
+				GameManager.inst.RunMapDestruction();
+				break;
 		}
 	}
 	public virtual void SwapState(MenuStates newState, bool backButton)
@@ -177,7 +201,7 @@ public class Buttons : MonoBehaviour
 			StateEnd();
 			menuState = newState;
 			StateStart();
-
+			
 			lastStateSwapTime = Time.time;
 		}
 	}

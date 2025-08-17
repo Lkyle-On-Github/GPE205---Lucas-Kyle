@@ -14,6 +14,7 @@ public abstract class Pawn : MonoBehaviour
 	public Shooter shooter;
 	public Damage damage;
 	public Health health;
+	public HealthDisplay healthDisplay;
 	public GameObject leftSide;
 	public GameObject leftAngle;
 	public GameObject rightSide;
@@ -24,6 +25,7 @@ public abstract class Pawn : MonoBehaviour
 	public Spawnpoint spawnpoint;
 	public int spawnpointIndex;
 	public AudioClip deathSound;
+
 
     // Start is called before the first frame update
     public virtual void Start()
@@ -37,6 +39,7 @@ public abstract class Pawn : MonoBehaviour
 			//I have to store this because calling it in destroy no worky
 			spawnpointIndex = spawnpoint.listSpawnedPawns.IndexOf(this);
 		}
+		
     }
 
     // Update is called once per frame
@@ -74,7 +77,7 @@ public abstract class Pawn : MonoBehaviour
 				GameManager.inst.listPawns.Remove(this);
 				
 		}
-		if (spawnpoint.listSpawnedPawns != null)
+		if (spawnpoint != null && spawnpoint.listSpawnedPawns != null)
 		{
 			//make the index null to retain list order
 			//Debug.Log(spawnpoint.listSpawnedPawns.IndexOf(this));

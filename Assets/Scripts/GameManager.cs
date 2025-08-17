@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     public GameObject preTankPawn;
 	public GameObject preTempSFXObject;
 	public GameObject hasMapGenerator;
+	public Buttons menuHandler;
 	public enum MapGenSettings {Random, Custom, Daily};
 	public MapGenSettings mapGenMode;
 	public int customSeed;
@@ -26,6 +27,8 @@ public class GameManager : MonoBehaviour
 	public bool hasGenerated;
 	public bool multiplayer;
 	public int numEnemies;
+
+	public float earnedScore;
 	
 
 	public enum Noises {Movement, Shot, Explosion, Hit};
@@ -51,6 +54,9 @@ public class GameManager : MonoBehaviour
 	//if the controls can be set in a menu they would need to be stored here, for now this will just be used for default controls
 	public List<KeyCode> PlayerOneKeys;
 	public List<KeyCode> PlayerTwoKeys;
+	public HUDController hudController;
+	public Material p1Color;
+	public Material p2Color;
     //reference to self
 	public static GameManager inst;
 
@@ -173,16 +179,33 @@ public class GameManager : MonoBehaviour
 		//add the used spawn to the used spawns array
 		listUsedSpawns.Add(listPlayerSpawns[usedSpawn]);
     }
-
+ 
 	public void SetPlayerTwoControls(PlayerController player)
-	{
-	
-	player.moveForwardKey = PlayerTwoKeys[0];
-	player.moveBackwardKey = PlayerTwoKeys[1];
-	player.rotateClockwiseKey = PlayerTwoKeys[2];
-	player.rotateCounterClockwiseKey = PlayerTwoKeys[3];
+	{	
+		player.moveForwardKey = PlayerTwoKeys[0];
+		player.moveBackwardKey = PlayerTwoKeys[1];
+		player.rotateClockwiseKey = PlayerTwoKeys[2];
+		player.rotateCounterClockwiseKey = PlayerTwoKeys[3];
 
-	player.shootKey = PlayerTwoKeys[4];
+		player.shootKey = PlayerTwoKeys[4];
+	}
+
+	public void ColorPlayer(int player, Pawn pawn)
+	{
+		MeshRenderer playerMeshRenderer = pawn.GetComponent<MeshRenderer>();
+		Material[] newMaterials = new Material[3];
+		//set these two to defaults
+		newMaterials[0] = playerMeshRenderer.materials[0];
+		newMaterials[1] = playerMeshRenderer.materials[1];
+		if(player == 0)
+		{
+			newMaterials[2] = p1Color;
+		}
+		else 
+		{
+			newMaterials[2] = p2Color;
+		}
+		playerMeshRenderer.materials = newMaterials;
 	}
 
 	public void SpawnRandomEnemies()
@@ -280,13 +303,19 @@ public class GameManager : MonoBehaviour
 					}
 				}
 			}
-
+			//TODO: shorten this all to initialize player function
 			SpawnPlayer();
+			listPlayers[0].BindDisplay(hudController.p1UI);
+			listPlayers[0].playerID = 0;
+			ColorPlayer(0, listPlayers[0].pawn);
 			//if multiplayer, spawn second player, and give them player 2 controls
 			if(multiplayer)
 			{
 				SpawnPlayer();
 				SetPlayerTwoControls(listPlayers[1]);
+				listPlayers[1].BindDisplay(hudController.p2UI);
+				listPlayers[1].playerID = 1;
+				ColorPlayer(1, listPlayers[1].pawn);
 			}
 			if(numEnemies < 0)
 			{
@@ -297,6 +326,7 @@ public class GameManager : MonoBehaviour
 			}
 
 			UpdateCams();
+		
 	}
 
 	public void RunMapDestruction()
@@ -344,11 +374,6 @@ public class GameManager : MonoBehaviour
 	//since this does a lot of array iterations, it is only called each time a player enters or exits a room's roomtrigger
 	public void UpdateCams() 
 	{
-		//FOUND BUGS
-		/*
-		sometimes player 2 gets control of player 1's camera, fixes when player one moves (?)
-		camera still likes to freak out all the time
-		*/
 		foreach(Room room in listRooms)
 			{
 				room.StopCamera();
@@ -408,6 +433,7 @@ public class GameManager : MonoBehaviour
 			}
 		} else
 		{
+			//there is only one camera, set it to default settings.
 			foreach(GameObject camera in listActiveCams)
 			{
 				RoomCamera currCam = camera.GetComponent<RoomCamera>();
@@ -415,6 +441,23 @@ public class GameManager : MonoBehaviour
 			}
 		}
 	}
+
+	public void OverrideUIPositions()
+	{
+		Debug.Log("doing override!");
+		//sets the first player or solo player to the left side, and the other player to the right side by default
+		foreach(PlayerController player in listPlayers)
+		{
+			if(listPlayers.IndexOf(player) == 0)
+			{
+				player.uiHandler.boundUI.SetSide(true);
+			} else
+			{
+				player.uiHandler.boundUI.SetSide(false);
+			}
+		}
+	}
+
 	//TitleScreen, MainMenu, Options, Game, GameOver, Credits
 	protected virtual void StateStart() 
 	{
@@ -431,6 +474,7 @@ public class GameManager : MonoBehaviour
 				//RunMapDestruction();
 				break;
 			case GameStates.Game:
+				hudController.gameObject.SetActive(true);
 				if(!hasMapGenerator.GetComponent<MapGenerator>().mapExists)
 				{
 					RunMapGeneration();
@@ -458,7 +502,7 @@ public class GameManager : MonoBehaviour
 
 				break;
 			case GameStates.Game:
-
+				hudController.gameObject.SetActive(false);
 				break;
 			case GameStates.GameOver:
 
@@ -485,6 +529,16 @@ public class GameManager : MonoBehaviour
 	{
 		GameObject currSFXObj = Instantiate(preTempSFXObject, pos, Quaternion.identity) as GameObject;
 		currSFXObj.GetComponent<AudioSource>().clip = audioClip;
+	}
+
+	public void OnPlayerDeath()
+	{
+		if(listPlayers.Count == 0)
+		{
+			SwapState(GameStates.GameOver);
+			menuHandler.SwapState(Buttons.MenuStates.GameOver, false);
+			menuHandler.gameOverScore.text = new string("Total Score: " + earnedScore);
+		}
 	}
 }
 

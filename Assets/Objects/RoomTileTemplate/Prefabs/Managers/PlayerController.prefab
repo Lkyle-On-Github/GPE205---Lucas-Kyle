@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2365343381750273285}
   - component: {fileID: 2365343381750273284}
+  - component: {fileID: -3508258105108873684}
   m_Layer: 0
   m_Name: PlayerController
   m_TagString: Untagged
@@ -45,8 +46,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 0}
+  score: 0
+  lives: 0
+  spawnpoint: {fileID: 0}
+  spawnpointIndex: 0
   moveForwardKey: 119
   moveBackwardKey: 115
   rotateClockwiseKey: 97
   rotateCounterClockwiseKey: 100
   shootKey: 32
+  uiHandler: {fileID: -3508258105108873684}
+--- !u!114 &-3508258105108873684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2365343381750273306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eae4c8ba43dc23d47a0aea6def32d986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 2365343381750273284}
+  boundUI: {fileID: 0}
+  scoreDisplay: {fileID: 0}
+  livesDisplay: {fileID: 0}
+  healthDisplay: {fileID: 0}

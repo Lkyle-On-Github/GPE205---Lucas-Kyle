@@ -51,7 +51,7 @@ public class PowerupSpawner : MonoBehaviour
 
 	public void OnDestroy()
 	{
-		if(GameManager.inst.hasMapGenerator != null && !GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().mapExists)
+		if(GameManager.inst.hasMapGenerator != null && !GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().mapExists && powerupInst != null)
 		{
 			Destroy(powerupInst);
 		}

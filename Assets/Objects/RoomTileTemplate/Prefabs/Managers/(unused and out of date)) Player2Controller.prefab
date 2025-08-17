@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2365343381750273285}
   - component: {fileID: 2365343381750273284}
   m_Layer: 0
-  m_Name: Player2Controller
+  m_Name: (unused and out of date)) Player2Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
