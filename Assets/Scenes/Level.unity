@@ -1741,7 +1741,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   p1DamageKey: 99
   p2DamageKey: 118
-  damageIncreaseKey: 43
+  damageIncreaseKey: 61
   damageDecreaseKey: 45
 --- !u!1001 &1405636594
 PrefabInstance:
@@ -3238,7 +3238,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2793050995727785185, guid: 1f85fd98acd8c134ab0b5564d0c04b8d, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4550550432830558499, guid: 1f85fd98acd8c134ab0b5564d0c04b8d, type: 3}
       propertyPath: m_Enabled

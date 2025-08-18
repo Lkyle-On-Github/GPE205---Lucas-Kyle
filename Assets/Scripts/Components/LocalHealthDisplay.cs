@@ -18,11 +18,14 @@ public class LocalHealthDisplay : HealthDisplay
     // Update is called once per frame
     void Update()
     {
-		Vector3 targetDir = pawn.roomLocation.roomCamera.gameObject.transform.position - transform.position;
-    	//gameObject.transform.rotation = Vector3.Angle(gameObject.transform.position, pawn.roomLocation.roomCamera.transform.position);
-		//Vector3.RotateTowards(transform.forward, targetDir, 180, 0);
-		transform.forward = new Vector3(0, targetDir.y, targetDir.z);
-		//gameObject.transform.forward = 
+		if(GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().mapExists)
+		{
+			Vector3 targetDir = pawn.roomLocation.roomCamera.gameObject.transform.position - transform.position;
+			//gameObject.transform.rotation = Vector3.Angle(gameObject.transform.position, pawn.roomLocation.roomCamera.transform.position);
+			//Vector3.RotateTowards(transform.forward, targetDir, 180, 0);
+			transform.forward = new Vector3(0, targetDir.y, targetDir.z);
+			//gameObject.transform.forward = 
+		}
     }
 
 	public override void SetHealth(float hp)

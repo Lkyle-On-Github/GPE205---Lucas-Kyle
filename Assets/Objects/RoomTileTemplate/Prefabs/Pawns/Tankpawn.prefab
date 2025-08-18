@@ -307,7 +307,7 @@ MonoBehaviour:
   NoPawn: 0
   pawn: {fileID: 0}
   audioSource: {fileID: 0}
-  audioClip: {fileID: 8300000, guid: b567548ef227740478354ee418802088, type: 3}
+  audioClip: {fileID: 8300000, guid: e492d6561ccbe454eb12d1c4ce01461f, type: 3}
 --- !u!114 &6483262929035907702
 MonoBehaviour:
   m_ObjectHideFlags: 0

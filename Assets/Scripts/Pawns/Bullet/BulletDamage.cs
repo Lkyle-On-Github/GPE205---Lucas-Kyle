@@ -8,6 +8,7 @@ public class BulletDamage : Damage
 	//for objects which you know will only have one attack, defining a damage variable is acceptable
 	public float damage;
 	public Projectile proj;
+	public AudioClip contactSound;
     // Start is called before the first frame update
     void Start()
     {
@@ -60,6 +61,7 @@ public class BulletDamage : Damage
 					}
 					//destroyed on any collision
 					Destroy(gameObject);
+					GameManager.inst.SpawnSoundEffect(contactSound, transform.position);
 				}
 			}
 	}

@@ -48,6 +48,7 @@ public class AIController : Controller
         base.Start();
 		state = States.Idle;
 		StateStart();
+		//
     }
 
     // Update is called once per frame
@@ -499,6 +500,10 @@ public class AIController : Controller
 		//if it hit nothing
 		return !Physics.Raycast(pawn.transform.position, toPoint, out hitInfo, pointDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
 			
+	}
+	public override void OnDestroy()
+	{
+		base.OnDestroy();
 	}
 }
 //TO DO

@@ -21,7 +21,7 @@ public class Controller : MonoBehaviour
 		{
 				GameManager.inst.listControllers.Add(this);
 		}
-		if (spawnpoint.listSpawnedControllers != null)
+		if (spawnpoint != null && spawnpoint.listSpawnedControllers != null)
 		{
 			//I have to store this because calling it in destroy no worky
 			spawnpointIndex = spawnpoint.listSpawnedControllers.IndexOf(this);
@@ -59,7 +59,7 @@ public class Controller : MonoBehaviour
 			spawnpoint.Respawn(this);
 		}
 	}
-	public void OnDestroy()
+	public virtual void OnDestroy()
 	{
 
 		//Remove from player list

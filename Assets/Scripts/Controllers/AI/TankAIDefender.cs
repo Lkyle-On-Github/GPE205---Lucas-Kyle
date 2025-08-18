@@ -21,6 +21,7 @@ public class TankAIDefender : AIController
 	public Pawn target;
 	void Start()
     {
+		base.Start();
 		//perhaps I should make this pick the closest player?
         target = GameManager.inst.listPlayers[0].pawn;
 		SwapState(States.Patrol);
@@ -219,5 +220,10 @@ public class TankAIDefender : AIController
 			{
 				RotateClockwise();
 			}
+	}
+
+	public override void OnDestroy()
+	{
+		base.OnDestroy();
 	}
 }

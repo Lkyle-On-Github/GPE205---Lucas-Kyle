@@ -49,7 +49,10 @@ public abstract class Pawn : MonoBehaviour
 		//lastPosition = transform.position;
 		//I think this doesnt do anything
 		//Debug.Log(spawnpoint.listSpawnedPawns.IndexOf(this));
-		
+		if (GameManager.inst.listPawns != null && !GameManager.inst.listPawns.Contains(this)) 
+		//{
+				GameManager.inst.listPawns.Add(this);
+		//}
     }
 
     public abstract void RotateClockwise();
