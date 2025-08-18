@@ -7,7 +7,7 @@ using UnityEngine.Audio;
 [System.Serializable]
 public class GameManager : MonoBehaviour
 {
-	public enum GameStates {TitleScreen, MainMenu, Options, Game, GameOver, Credits};
+	public enum GameStates {TitleScreen, MainMenu, Options, Game, GameOver};
 	public GameStates gameState;
 	public float lastStateSwapTime;
 
@@ -92,6 +92,8 @@ public class GameManager : MonoBehaviour
             inst = this;
 			
             DontDestroyOnLoad(gameObject);
+			listPawns = new List<Pawn>();
+		 	listControllers = new List<Controller>();
 			
         } else 
 		{
@@ -523,9 +525,6 @@ public class GameManager : MonoBehaviour
 			case GameStates.GameOver:
 				gameOverFlag = true;
 				break;
-			case GameStates.Credits:
-
-				break;
 		}
 	}
 	protected virtual void StateEnd()
@@ -548,9 +547,6 @@ public class GameManager : MonoBehaviour
 				}
 				break;
 			case GameStates.GameOver:
-
-				break;
-			case GameStates.Credits:
 
 				break;
 		}
@@ -587,14 +583,3 @@ public class GameManager : MonoBehaviour
 		}
 	}
 }
-
-/*
-	Debug notes: 
-	game appears to restart correctly, but on the second restart the map fails to load
-	playercontroller exists with no pawn
-	I should make sure it gets deleted on the first restart
-	it does
-	hmm
-	rereading spawn code to see if respawn is missing anything
-
-*/

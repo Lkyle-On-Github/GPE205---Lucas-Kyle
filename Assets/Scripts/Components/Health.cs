@@ -84,12 +84,15 @@ public class Health : MonoBehaviour
 			pawn.healthDisplay.SetHealth(hp);
 		} else
 		{
+			//check with the controller if it has a health display for the pawn to use
 			if(pawn.controller.FetchHealthDisplay())
 			{
 				pawn.healthDisplay.SetHealth(hp);
 			}  else
 			{
-				Debug.Log("No health display could be found in the pawn's controller");
+				//otherwise, default to the local health display
+				pawn.healthDisplay = pawn.LocalHealthDisplay.GetComponent<HealthDisplay>();
+				pawn.healthDisplay.gameObject.SetActive(true);
 			}
 		}
 	}

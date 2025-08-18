@@ -10,7 +10,7 @@ public class DebugSwapGameState : MonoBehaviour
 	public KeyCode OptionsKey;
 	public KeyCode GameKey;
 	public KeyCode GameOverKey;
-	public KeyCode CreditsKey;
+	//public KeyCode CreditsKey;
     // Start is called before the first frame update
     void Start()
     {
@@ -40,9 +40,11 @@ public class DebugSwapGameState : MonoBehaviour
 		{
 			GameManager.inst.SwapState(GameManager.GameStates.GameOver);
 		}
+		/*
 		if(Input.GetKeyDown(CreditsKey))
 		{
 			GameManager.inst.SwapState(GameManager.GameStates.Credits);
 		}
+		*/
     }
 }

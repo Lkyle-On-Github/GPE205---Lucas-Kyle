@@ -40,7 +40,7 @@ public class HealthDisplay : MonoBehaviour
 			barTransform.anchoredPosition = new Vector2(-45, 5);
 		}
 	}
-	public void SetHealth(float hp)
+	public virtual void SetHealth(float hp)
 	{
 		//hp / 5 = scale
 		RectTransform barTransform = healthBar.GetComponent<RectTransform>();

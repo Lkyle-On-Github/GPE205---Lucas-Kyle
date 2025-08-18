@@ -71,6 +71,7 @@ public class MusicPlayer : MonoBehaviour
 					audioSource.UnPause();
 				}
 				break;
+			/*
 			case GameManager.GameStates.Credits:
 				if(ContinuousListMenuTheme.Contains(storedState)) 
 			{
@@ -82,6 +83,7 @@ public class MusicPlayer : MonoBehaviour
 				audioSource.Play();
 			}
 				break;
+				*/
 		}
 	}
 }

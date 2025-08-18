@@ -17,8 +17,9 @@ public class TankPawn : Pawn
 
 
     // Start is called before the first frame update
-    public override void Start()
+    public override void Awake()
     {
+		base.Awake();
         //base.Start();
         rb = GetComponent<Rigidbody>();
         mover = GetComponent<Mover>();
@@ -29,7 +30,7 @@ public class TankPawn : Pawn
 		treadsNoisemaker = GetComponent<TreadsNoisemaker>();
 		shotNoisemaker = GetComponent<ShotNoisemaker>();
 		hitNoisemaker = GetComponent<HitNoisemaker>();
-		base.Start();
+		
     }
 
     // Update is called once per frame

@@ -27,10 +27,12 @@ public class RoomTrigger : MonoBehaviour
 				
 				//room.StartCamera();
 				GameManager.inst.UpdateCams();
-			}
+			} else
+			{
 			//moving roomLocation update to the distance check thingy in the cam update
-			//all pawns should update their room location
-			//collidingPawn.roomLocation = room;
+			//AI's can use simplified room detection
+				collidingPawn.roomLocation = room;
+			}
 		}
 	}
 	/*

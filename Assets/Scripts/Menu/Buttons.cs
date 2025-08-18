@@ -5,12 +5,14 @@ using UnityEngine.UI;
 
 public class Buttons : MonoBehaviour
 {
+	public AudioClip buttonPressSound;
 	//Bro how the fuck do u turn off a button
 	public GameObject startButtonObject;
 	public GameObject multiplayerButtonObject;
 	public GameObject creditsButtonObject;
 	public GameObject settingsButtonObject;
 	public GameObject backButtonObjectAsd;
+	public GameObject quitButtonObject;
 	public GameObject titleScreen;
 	public GameObject creditsScreen;
 	public GameObject settingsScreen;
@@ -36,6 +38,10 @@ public class Buttons : MonoBehaviour
     {
         
     }
+	public void ButtonPressedSound()
+	{
+		GameManager.inst.SpawnSoundEffect(buttonPressSound, GameManager.inst.transform.position);
+	}
 	public void EnableBackButton()
 	{
 		backButtonObjectAsd.SetActive(true);
@@ -77,12 +83,14 @@ public class Buttons : MonoBehaviour
 		GameManager.inst.multiplayer = false;
 		SwapState(MenuStates.Game, false);
 		//DisableBackButton();
+		ButtonPressedSound();
 	}
 
 	public void MultiplayerButton()
 	{
 		GameManager.inst.multiplayer = true;
 		SwapState(MenuStates.Game, false);
+		ButtonPressedSound();
 	}
 
 	public void CreditsButton()
@@ -90,6 +98,7 @@ public class Buttons : MonoBehaviour
 		//EnableBackButton();
 		SwapState(MenuStates.Credits, true);
 		DisableButtons(menuButtonObjects);
+		ButtonPressedSound();
 	}
 
 	public void SettingsButton()
@@ -99,6 +108,12 @@ public class Buttons : MonoBehaviour
 		GameManager.inst.SwapState(GameManager.GameStates.Options);
 		SwapState(MenuStates.Settings, true);
 		DisableButtons(menuButtonObjects);
+		ButtonPressedSound();
+	}
+	public void QuitButton()
+	{
+		Application.Quit();
+		UnityEditor.EditorApplication.isPlaying = false;
 	}
 
 	public void BackButton()
@@ -113,6 +128,7 @@ public class Buttons : MonoBehaviour
 		SwapState(returnState, false);
 		//
 		DisableBackButton();
+		ButtonPressedSound();
 		
 	}
 
@@ -121,12 +137,14 @@ public class Buttons : MonoBehaviour
 		//swapping from gameover state will delete the level, and swapping gamemanager to game state will generate a new level.
 		SwapState(MenuStates.Game, false);
 		settingsButtonObject.SetActive(true);
+		ButtonPressedSound();
 	}
 
 	public void MenuButton()
 	{
 		SwapState(MenuStates.Main, false);
 		//swapping from gameover state deletes the level.
+		ButtonPressedSound();
 	}
 
 	
@@ -146,6 +164,7 @@ public class Buttons : MonoBehaviour
 			case MenuStates.Main:
 				EnableButtons(menuButtonObjects);
 				GameManager.inst.SwapState(GameManager.GameStates.MainMenu);
+				quitButtonObject.SetActive(true);
 				break;
 			case MenuStates.Credits:
 				creditsScreen.gameObject.SetActive(true);
@@ -160,6 +179,7 @@ public class Buttons : MonoBehaviour
 			case MenuStates.GameOver:
 				settingsButtonObject.SetActive(false);
 				gameOverScreen.gameObject.SetActive(true);
+				quitButtonObject.SetActive(true);
 				break;
 		}
 	}
@@ -171,7 +191,7 @@ public class Buttons : MonoBehaviour
 				titleScreen.SetActive(false);
 				break;
 			case MenuStates.Main:
-
+				quitButtonObject.SetActive(false);
 				break;
 			case MenuStates.Credits:
 			//DisableButtons(new List<GameObject>{backButtonObject});
@@ -187,6 +207,7 @@ public class Buttons : MonoBehaviour
 			case MenuStates.GameOver:
 				gameOverScreen.gameObject.SetActive(false);
 				GameManager.inst.RunMapDestruction();
+				quitButtonObject.SetActive(false);
 				break;
 		}
 	}

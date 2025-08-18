@@ -67,7 +67,7 @@ public class Controller : MonoBehaviour
 		{
 			GameManager.inst.listControllers.Remove(this);
 		}
-		if (spawnpoint.listSpawnedControllers != null)
+		if (spawnpoint != null && spawnpoint.listSpawnedControllers != null)
 		{
 			//make the index null to retain list order
 			spawnpoint.listSpawnedControllers[spawnpointIndex] = null;

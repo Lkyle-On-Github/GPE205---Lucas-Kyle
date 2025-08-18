@@ -25,16 +25,17 @@ public abstract class Pawn : MonoBehaviour
 	public Spawnpoint spawnpoint;
 	public int spawnpointIndex;
 	public AudioClip deathSound;
+	public GameObject LocalHealthDisplay;
 
 
     // Start is called before the first frame update
-    public virtual void Start()
+    public virtual void Awake()
     {
-		if (GameManager.inst.listPawns != null) 
-		{
+		//if (GameManager.inst.listPawns != null) 
+		//{
 				GameManager.inst.listPawns.Add(this);
-		}
-		if (spawnpoint.listSpawnedPawns != null)
+		//}
+		if (spawnpoint != null && spawnpoint.listSpawnedPawns != null)
 		{
 			//I have to store this because calling it in destroy no worky
 			spawnpointIndex = spawnpoint.listSpawnedPawns.IndexOf(this);
