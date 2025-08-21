@@ -16,6 +16,7 @@ public class Buttons : MonoBehaviour
 	public GameObject titleScreen;
 	public GameObject creditsScreen;
 	public GameObject settingsScreen;
+	public GameObject controlsScreen;
 	public GameObject gameOverScreen;
 	public Text gameOverScore;
 
@@ -110,6 +111,20 @@ public class Buttons : MonoBehaviour
 		DisableButtons(menuButtonObjects);
 		ButtonPressedSound();
 	}
+
+	public void ControlsButton()
+	{
+		settingsScreen.SetActive(false);
+		backButtonObjectAsd.SetActive(false);
+		controlsScreen.SetActive(true);
+	}
+	public void ControlsBackButton()
+	{
+		settingsScreen.SetActive(true);
+		backButtonObjectAsd.SetActive(true);
+		controlsScreen.SetActive(false);
+	}
+
 	public void QuitButton()
 	{
 		Application.Quit();
@@ -159,6 +174,7 @@ public class Buttons : MonoBehaviour
 				titleScreen.SetActive(true);
 				backButtonObjectAsd.SetActive(false);
 				DisableButtons(menuButtonObjects);
+				controlsScreen.SetActive(false);
 				//DisableButtons(arrayThatJustHoldsTheUselessObjectThatHoldsTheBackButtonBecauseTheButtonsInThisProgramAreAPieceOfShit);
 				break;
 			case MenuStates.Main:

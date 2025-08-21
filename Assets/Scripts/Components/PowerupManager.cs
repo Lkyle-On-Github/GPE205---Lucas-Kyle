@@ -6,11 +6,13 @@ public class PowerupManager : MonoBehaviour
 {
 	public List<Powerup> powerups;
 	private List<Powerup> removeQueue;
+	public Pawn pawn;
     // Start is called before the first frame update
     void Start()
     {
          powerups = new List<Powerup>();
 		 removeQueue = new List<Powerup>();
+		 pawn = GetComponent<Pawn>();
     }
 
     // Update is called once per frame
@@ -25,14 +27,23 @@ public class PowerupManager : MonoBehaviour
 
 	public void GainBuff (Powerup toAdd)
 	{
-		toAdd.Apply(this);
-		powerups.Add(toAdd);
+		//if the buff isnt added as a stack, add it as a new instance to the powerupmanager.
+		if(!toAdd.Apply(this, false))
+		{
+			AddToList(toAdd);
+		}
 	}
 
+	public void AddToList(Powerup toAdd)
+	{
+		powerups.Add(toAdd);
+		pawn.controller.GetComponent<UIHandler>().AddBuff(toAdd);
+	}
 	public void LoseBuff (Powerup toRemove)
 	{
 		powerups.Remove(toRemove);
 		toRemove.Remove(this);
+		//pawn.controller.GetComponent<UIHandler>().RemoveBuff(toRemove);
 	}
 
 	public void DecrementPowerupTimers()

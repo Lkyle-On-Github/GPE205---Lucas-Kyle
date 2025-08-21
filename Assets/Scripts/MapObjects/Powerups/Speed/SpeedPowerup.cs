@@ -6,21 +6,57 @@ using UnityEngine;
 public class SpeedPowerup : Powerup
 {
 	
-	public float spdBoost;
+	//public float spdBoost;
 	//I think its dumb when health boosts remove the health they gave you when they run out, because then they didnt even do anything, 
 	//so im making it so that the health is only removed if it wasnt used
 
-	public override void Apply(PowerupManager target)
+	public override bool Apply(PowerupManager target, bool direct)
     {
-		// Apply Health changes
-        Pawn targetPawn = target.GetComponent<Pawn>();
-        if (targetPawn != null) 
-        {
-			targetPawn.moveSpeed += spdBoost;
-			//I have to increase the bullet speed otherwise it is dumb.
-			Shooter pawnShooter = targetPawn.GetComponent<Shooter>();
-			pawnShooter.fireForce += spdBoost;
-        }
+		if(direct)
+		{
+			// Apply Health changes
+			Pawn targetPawn = target.GetComponent<Pawn>();
+			if (targetPawn != null) 
+			{
+				targetPawn.moveSpeed += strength;
+				//I have to increase the bullet speed otherwise it is dumb.
+				Shooter pawnShooter = targetPawn.GetComponent<Shooter>();
+				pawnShooter.fireForce += strength;
+			}
+			return true;
+		} else
+		{
+			Powerup stackingPowerup = null;
+			foreach (Powerup powerup in target.powerups)
+			{
+				if(powerup as SpeedPowerup != null)
+				{
+					stackingPowerup = powerup;
+				}
+			}
+			// Apply Health changes
+			if(stackingPowerup != null)
+				{
+					if (stackingPowerup.Stack(target, this))
+					{
+						return true;
+					}
+
+				} else
+				{
+					// Apply Health changes
+					Pawn targetPawn = target.GetComponent<Pawn>();
+					if (targetPawn != null) 
+					{
+						targetPawn.moveSpeed += strength;
+						//I have to increase the bullet speed otherwise it is dumb.
+						Shooter pawnShooter = targetPawn.GetComponent<Shooter>();
+						pawnShooter.fireForce += strength;
+					}
+					
+				}
+				return false;
+		}
     }
 
     public override void Remove(PowerupManager target)
@@ -30,10 +66,10 @@ public class SpeedPowerup : Powerup
 		Pawn targetPawn = target.GetComponent<Pawn>();
         if (targetPawn != null) 
         {
-			targetPawn.moveSpeed -= spdBoost;
+			targetPawn.moveSpeed -= strength;
 			//I have to increase the bullet speed otherwise it is dumb.
 			Shooter pawnShooter = targetPawn.GetComponent<Shooter>();
-			pawnShooter.fireForce -= spdBoost;
+			pawnShooter.fireForce -= strength;
         }
     }
 	

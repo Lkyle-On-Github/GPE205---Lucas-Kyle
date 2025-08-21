@@ -25,6 +25,11 @@ public class UIHandler : MonoBehaviour
 
 	}
 
+	public virtual void AddBuff(Powerup powerup)
+	{
+		
+	}
+
 	public void OnDestroy()
 	{
 		if(boundUI != null)

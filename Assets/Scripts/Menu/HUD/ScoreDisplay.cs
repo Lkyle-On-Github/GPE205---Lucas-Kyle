@@ -7,6 +7,7 @@ public class ScoreDisplay : MonoBehaviour
 {
 	public Text text;
 	public HUDController hudController;
+	//private Text text; 
     // Start is called before the first frame update
     void Start()
     {
@@ -15,7 +16,7 @@ public class ScoreDisplay : MonoBehaviour
 
 	void Awake()
 	{
-		text = Instantiate(hudController.defaultText, gameObject.transform);
+		text = Instantiate(hudController.defaultText, gameObject.transform);//
 		text.rectTransform.localPosition = new Vector3(0, -20, 0);
 		text.gameObject.SetActive(true);
 	}

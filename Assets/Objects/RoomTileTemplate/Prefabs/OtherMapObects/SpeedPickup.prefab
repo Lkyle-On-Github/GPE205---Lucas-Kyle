@@ -115,6 +115,8 @@ MonoBehaviour:
   audioClip: {fileID: 8300000, guid: e5210d1d7ed647143af6354ef484cf24, type: 3}
   powerup:
     duration: 30
+    strength: 3
+    stackType: 0
     isPermanent: 0
     spdBoost: 3
 --- !u!114 &2441759027720758865

@@ -53,8 +53,9 @@ public class GameManager : MonoBehaviour
 	public List<NoiseMaker> activeNoises;
 
 	//if the controls can be set in a menu they would need to be stored here, for now this will just be used for default controls
-	public List<KeyCode> PlayerOneKeys;
-	public List<KeyCode> PlayerTwoKeys;
+	public enum PlayerKeys {Forward, Backward, Clockwise, CounterClockwise, Shoot};
+	public Controls p1Controls;
+	public Controls p2Controls;
 	public HUDController hudController;
 	public Material p1Color;
 	public Material p2Color;
@@ -86,6 +87,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
 		
+		//foreach(int i in )
+		//testarraydeleteplz = Enum.GetNames(typeof(PlayerKeys));
+		//asdfg = Enum.Parse<PlayerKeys>(testarraydeleteplz[2]);
+		//Debug.Log(PlayerKeys.ToString());
 		 //Singleton Check
         if (inst == null || inst == this) 
 		{
@@ -94,6 +99,8 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 			listPawns = new List<Pawn>();
 		 	listControllers = new List<Controller>();
+			
+			//	UpdateControls(true, PlayerKeys.Forward, KeyCode.W);
 			
         } else 
 		{
@@ -182,15 +189,16 @@ public class GameManager : MonoBehaviour
 		//add the used spawn to the used spawns array
 		listUsedSpawns.Add(listPlayerSpawns[usedSpawn]);
     }
- 
-	public void SetPlayerTwoControls(PlayerController player)
+	
+	public void SetPlayerControls(int player)
 	{	
-		player.moveForwardKey = PlayerTwoKeys[0];
-		player.moveBackwardKey = PlayerTwoKeys[1];
-		player.rotateClockwiseKey = PlayerTwoKeys[2];
-		player.rotateCounterClockwiseKey = PlayerTwoKeys[3];
 
-		player.shootKey = PlayerTwoKeys[4];
+	//	player.moveForwardKey = PlayerTwoKeys[0];
+	//	player.moveBackwardKey = PlayerTwoKeys[1];
+	//	player.rotateClockwiseKey = PlayerTwoKeys[2];
+	//	player.rotateCounterClockwiseKey = PlayerTwoKeys[3];
+//
+//		player.shootKey = PlayerTwoKeys[4];
 	}
 
 	public void ColorPlayer(int player, Pawn pawn)
@@ -332,14 +340,16 @@ public class GameManager : MonoBehaviour
 			listPlayers[0].BindDisplay(hudController.p1UI);
 			listPlayers[0].playerID = 0;
 			ColorPlayer(0, listPlayers[0].pawn);
+			p1Controls.SetPlayerControls(listPlayers[0]);
 			//if multiplayer, spawn second player, and give them player 2 controls
 			if(multiplayer)
 			{
 				SpawnPlayer();
-				SetPlayerTwoControls(listPlayers[1]);
+				//SetPlayerTwoControls(listPlayers[1]);
 				listPlayers[1].BindDisplay(hudController.p2UI);
 				listPlayers[1].playerID = 1;
 				ColorPlayer(1, listPlayers[1].pawn);
+				p2Controls.SetPlayerControls(listPlayers[1]);
 			}
 			if(numEnemies < 0)
 			{
@@ -516,10 +526,16 @@ public class GameManager : MonoBehaviour
 				//RunMapDestruction();
 				break;
 			case GameStates.Game:
+				
 				hudController.gameObject.SetActive(true);
 				if(!hasMapGenerator.GetComponent<MapGenerator>().mapExists)
 				{
 					RunMapGeneration();
+				}
+				p1Controls.SetPlayerControls(listPlayers[0]);
+				if(multiplayer)
+				{
+					p2Controls.SetPlayerControls(listPlayers[1]);
 				}
 				break;
 			case GameStates.GameOver:
@@ -538,7 +554,7 @@ public class GameManager : MonoBehaviour
 
 				break;
 			case GameStates.Options:
-
+				
 				break;
 			case GameStates.Game:
 				if(hudController != null)
@@ -580,6 +596,27 @@ public class GameManager : MonoBehaviour
 		} else
 		{
 			UpdateCams();
+		}
+	}
+
+	public void UpdateControls(bool p1, PlayerKeys toChange, KeyCode newKey)
+	{
+		if(p1Controls == null)
+		{
+			p1Controls = new Controls();
+			p1Controls.InitControls();
+		}
+		if(p2Controls == null)
+		{
+			p2Controls = new Controls();
+			p2Controls.InitControls();			
+		}
+		if(p1)
+		{
+			p1Controls.ChangeKey(toChange, newKey);
+		} else
+		{
+			p2Controls.ChangeKey(toChange, newKey);
 		}
 	}
 }

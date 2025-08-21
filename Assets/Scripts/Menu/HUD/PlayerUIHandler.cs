@@ -7,6 +7,7 @@ public class PlayerUIHandler : UIHandler
 	public PlayerController controller;
 	public ScoreDisplay scoreDisplay;
 	public LivesDisplay livesDisplay;
+	public BuffsTable buffsTable;
 	
     // Start is called before the first frame update
     void Start()
@@ -99,6 +100,7 @@ public class PlayerUIHandler : UIHandler
 		scoreDisplay = boundUI.scoreDisplay;
 		livesDisplay = boundUI.livesDisplay;
 		healthDisplay = boundUI.healthDisplay;
+		buffsTable = boundUI.buffsTable;
 		DisplayDefaultValues();
 	}
 	public override void DisplayDefaultValues()
@@ -116,6 +118,13 @@ public class PlayerUIHandler : UIHandler
 		}
 	}
 
+	public override void AddBuff(Powerup powerup)
+	{
+		if(buffsTable != null)
+		{
+			buffsTable.Add(powerup);
+		}
+	}
 	public override void LoseLife()
 	{
 		if(livesDisplay != null)
@@ -123,4 +132,6 @@ public class PlayerUIHandler : UIHandler
 			livesDisplay.Decrement();
 		}
 	}
+
+
 }

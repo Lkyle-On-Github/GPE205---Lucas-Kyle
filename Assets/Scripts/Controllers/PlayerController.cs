@@ -129,4 +129,26 @@ public class PlayerController : Controller
 	{
 		uiHandler.DisplayDefaultValues();
 	}
+
+	public void UpdateKey(GameManager.PlayerKeys control, KeyCode newKey)
+	{
+		switch (control)
+		{
+			case GameManager.PlayerKeys.Forward:
+				moveForwardKey = newKey;
+				break;
+			case GameManager.PlayerKeys.Backward:
+				moveBackwardKey = newKey;
+				break;
+			case GameManager.PlayerKeys.Clockwise:
+				rotateClockwiseKey = newKey;
+				break;
+			case GameManager.PlayerKeys.CounterClockwise:
+				rotateCounterClockwiseKey = newKey;
+				break;
+			case GameManager.PlayerKeys.Shoot:
+				shootKey = newKey;
+				break;
+		}
+	}
 }

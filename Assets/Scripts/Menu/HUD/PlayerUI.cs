@@ -7,6 +7,7 @@ public class PlayerUI : MonoBehaviour
 
 	//this script exists to provide access to all of the parts of the players UI that other scripts may need to access
 	//to avoid any null reference errors, **ALL** player UI elements should be driven by the PlayerController's PlayerUIHandler
+	public bool isLeft;
 	public ScoreDisplay scoreDisplay;
 	public BuffsTable buffsTable;
 	public LivesDisplay livesDisplay;
@@ -28,8 +29,9 @@ public class PlayerUI : MonoBehaviour
 
 	public void SetSide(bool left)
 	{
+		isLeft = left;
 		scoreDisplay.ScreenSide(left);
-		//buffsTable.ScreenSide(left);
+		buffsTable.ScreenSide(left);
 		livesDisplay.ScreenSide(left);
 		healthDisplay.ScreenSide(left); 
 	}
