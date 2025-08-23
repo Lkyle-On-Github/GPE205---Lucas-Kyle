@@ -25,9 +25,12 @@ public class AIController : Controller
 	public List<GameManager.Noises> noisePrio;
 	public List<Pawn> visiblePawns;//
 
+	public Pawn target;
+
 	public NoiseMaker targetNoise;
 	public Vector3 targetNoisePos;
 
+	public Vector3 lastTargetPos;
 
 	public enum TurnSetting {None, Clockwise, CounterClockwise};
 	public float moveCheckDist;
@@ -39,6 +42,7 @@ public class AIController : Controller
 	public float navResetTime;
 	private float lastNavTrigger;
 	private float lastStuckCheckTime;
+	private bool stuckDir;
 	private Vector3 stuckCheckPos;
 
     // Start is called before the first frame update
@@ -132,7 +136,7 @@ public class AIController : Controller
 		{
 			if(GameManager.inst.activeNoises[i].pawn != pawn)
 			{
-				if(Vector3.Distance(transform.position, GameManager.inst.activeNoises[i].noiseLocation) < (hearDistance + GameManager.inst.activeNoises[i].volumeDistance))
+				if(Vector3.Distance(pawn.transform.position, GameManager.inst.activeNoises[i].noiseLocation) < (hearDistance + GameManager.inst.activeNoises[i].volumeDistance))
 				{
 					//adds it to the local array of noises this instance can hear
 					if(GameManager.inst.activeNoises[i].active == true)  
@@ -300,6 +304,7 @@ public class AIController : Controller
 					if(DidHitWall(didHit, hitInfo)) 
 					{
 						//why is the code reaching here while it is out in the open
+						//free me
 						//Debug.Log("didhitwall!!!");
 						pawn.transform.rotation = cachedQuat;
 						//this means it isnt turning towards a wall, it is just facing a wall. decide which direction to turn to face away from the wall.
@@ -452,12 +457,21 @@ public class AIController : Controller
 
 	protected virtual void DoStuckCheck()
 	{
-		if(lastStuckCheckTime + 1 < Time.time)
+		if(lastStuckCheckTime + 0.5f < Time.time)
 		{
 			if(Vector3.Distance(pawn.transform.position, stuckCheckPos) < 0.001f && turnDir == TurnSetting.None)
 			{
 				Debug.Log("unstucking!");
-				pawn.RotateClockwise();
+				if(stuckDir)
+				{
+					pawn.RotateClockwise();
+					pawn.RotateClockwise();
+				} else
+				{
+					pawn.RotateCounterClockwise();
+					pawn.RotateCounterClockwise();
+				}
+				stuckDir = !stuckDir;
 			}
 			stuckCheckPos = pawn.transform.position;
 			lastStuckCheckTime = Time.time;
@@ -505,6 +519,141 @@ public class AIController : Controller
 	{
 		base.OnDestroy();
 	}
+	//Planning out my logic
+	/*
+		Priorities
+		1. if there are multiple available targets, drop any that are behind the tank. this does not need to be implemented as no tanks can see backwards.
+		2. If its last target is alive, and it can see them, only swap priority if it is facing more towards the new target and the new target is closer.
+		since it will almost always be facing exactly towards its target, a little leeway should be allowed 
+		3. if two targets become visible at the same time, 
+	*/
+	public bool ChooseVisibleTarget()
+	{
+		//reset list
+		List<Pawn> listSpottedPlayers = new List<Pawn>();
+
+		foreach(Pawn pawn in visiblePawns)
+		{
+			if(GameManager.inst.listPlayers.Contains(pawn.controller as PlayerController))
+			{
+				listSpottedPlayers.Add(pawn);
+			}
+		}
+		//check if there is only one visible target and it can skip all that stuff
+		if(listSpottedPlayers.Count == 1)
+		{
+			target = listSpottedPlayers[0];
+			lastTargetPos = target.transform.position;
+			return true;
+		} else
+		{
+			if(listSpottedPlayers.Count == 0)
+			{
+				if(target != null)
+				{
+					lastTargetPos = target.transform.position;
+				}
+				target = null;
+				return false;
+			}
+		}
+
+		//if it has already chosen a target, only swap if the new target is closer and is angled well
+		if(target != null && listSpottedPlayers.Contains(target)) 
+		{
+			//calculate the target values beforehand to improve performance for more players
+			float targetAngle = Vector3.Angle(transform.forward, (target.transform.position - transform.position));
+			float targetDist = Vector3.Distance(transform.position, target.transform.position);
+			//make the spotted players besides for the target compare themselves to see if they are better targets
+			listSpottedPlayers.Remove(target);
+			foreach(Pawn player in listSpottedPlayers)
+			{
+				if(Vector3.Angle(transform.forward, (player.transform.position - transform.position)) < targetAngle +2.5)
+				{
+					if(Vector3.Distance(transform.position, player.transform.position) < targetDist)
+					{
+						target = player;
+					}
+				}
+			}
+			
+		} else
+		{
+			//none of the visible players are a previously selected target, so they are all considered fairly, but only distance is considered
+			float minDist = Vector3.Distance(transform.position, listSpottedPlayers[0].transform.position);
+			foreach(Pawn player in listSpottedPlayers)
+			{
+				float newDist = Vector3.Distance(transform.position, player.transform.position);
+				if(newDist < minDist)
+				{
+					minDist = newDist;
+					target = player;
+				}
+			}
+		}
+		//as long as the list of spotted players wasnt empty, it can return true
+		lastTargetPos = target.transform.position;
+		return true;
+	}
+
+	//
+	public bool GetNoiseOfType(GameManager.Noises noise)
+	{
+		bool foundNoise = false;
+		foreach(NoiseMaker noiseMaker in audibleNoises)
+		{
+			if(noiseMaker.noise == noise)
+			{
+				targetNoise = noiseMaker;
+				targetNoisePos = GetNoisePos(targetNoise);
+				foundNoise = true;
+			}
+		}
+		return foundNoise;
+	}
+
+	protected virtual bool ChooseNoiseByPrio()
+	{
+		//IMPORTANT: if an error led you here, make sure you are clearing your targetNoises!
+		NoiseMaker bestNoise = null;
+		if(targetNoise != null)
+		{
+			//if target noise still exists but no noises can be found, continue pursuing target noise
+			if(audibleNoises.Count == 0)
+			{
+				targetNoisePos = GetNoisePos(targetNoise);
+				return true;
+			}
+			//if target noise does not come from a destroyed noisemaker, ensure it still has priority
+			bestNoise = targetNoise;
+		} else
+		{
+			//if target noise is destroyed and no other noises can be found, destroy stale reference and return false.
+			if(audibleNoises.Count == 0)
+			{
+				targetNoise = null;
+				return false;
+			}
+			//otherwise do a normal min check
+			bestNoise = audibleNoises[0];
+		}
+		foreach(NoiseMaker noiseMaker in audibleNoises)
+		{
+			if (noisePrio.IndexOf(noiseMaker.noise) < noisePrio.IndexOf(bestNoise.noise))
+			{
+				bestNoise = noiseMaker;
+			}
+		}
+		//a noise must have been found if the code got here
+		targetNoise = bestNoise;
+		targetNoisePos = GetNoisePos(targetNoise);
+		return true;
+	}
+	
+	public bool IsFacing(Vector3 checkPos, float sensitivity)
+	{
+		checkPos = new Vector3(checkPos.x, pawn.transform.position.y, checkPos.z);
+		//Debug.Log((Vector3.Angle(pawn.transform.forward, checkPos - pawn.transform.position)));
+		return (Vector3.Angle(pawn.transform.forward, checkPos - pawn.transform.position) < sensitivity);
+	}
 }
-//TO DO
-//make sure pawns can't hear themselves

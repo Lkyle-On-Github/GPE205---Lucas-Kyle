@@ -7,7 +7,6 @@ public class TankAI : AIController
 	public float chaseDistance;
 	public float fleeDistance;
 	public float lowHealth;
-	public GameObject target;
 	public GameObject testOrb;
 
     // Start is called before the first frame update
@@ -15,7 +14,7 @@ public class TankAI : AIController
     {
 		StateStart();
 		//perhaps I should make this pick the closest player?
-        target = GameManager.inst.listPlayers[0].pawn.gameObject;
+       // target = GameManager.inst.listPlayers[0].pawn.gameObject;
     }
 
     // Update is called once per frame
@@ -95,7 +94,7 @@ public class TankAI : AIController
 		if(target != null) 
 		{
 		//UpdateTargetPos();
-		SeekSmart(target.transform.position);
+		//SeekSmart(target.transform.position);
 		//pawn.Shoot();
 		}
 	}
@@ -137,7 +136,7 @@ public class TankAI : AIController
 			//*flee distance = set magnitude
 			calcTargetPos = calcTargetPos * fleeDistance;
 			//+ target pos = localized to target
-			calcTargetPos += target.transform.position;
+			//calcTargetPos += target.transform.position;
 			SeekSmart(calcTargetPos);
 			}
 		}
@@ -150,10 +149,10 @@ public class TankAI : AIController
     {
 		if(target != null)
 		{
-			if (Vector3.Distance (pawn.transform.position, target.transform.position) < chaseDistance ) 
-			{
-				return true;
-			}
+			//if (Vector3.Distance (pawn.transform.position, target.transform.position) < chaseDistance ) 
+			//{
+			//	return true;
+			//}
 		}
         return false;
     }

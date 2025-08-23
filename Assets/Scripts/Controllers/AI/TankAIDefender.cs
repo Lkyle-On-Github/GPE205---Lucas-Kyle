@@ -9,7 +9,7 @@ public class TankAIDefender : AIController
 	private float guardStartTime;
 	public float guardDist;
 	public int patrolPoint;
-	private Vector3 patrolPos;
+	public Vector3 patrolPos;
 	private float rotateStart;
 	public bool subStateRotate;
 	//innefficient way to do this
@@ -18,12 +18,12 @@ public class TankAIDefender : AIController
 	public int spawnRoomZ;
 	public bool spawnRoomGotten;
 
-	public Pawn target;
 	void Start()
     {
 		base.Start();
 		//perhaps I should make this pick the closest player?
         target = GameManager.inst.listPlayers[0].pawn;
+		subStateRotate = true;
 		SwapState(States.Patrol);
 		ToggleSenses(true,false);
 		
@@ -36,6 +36,20 @@ public class TankAIDefender : AIController
         MakeDecisions();
     }
 
+	public void ShiftPatrolPoints()
+	{
+		if(pawn.roomLocation != null)
+			{
+				spawnRoomGotten = true;
+				spawnRoomX = pawn.roomLocation.x;
+				spawnRoomZ = pawn.roomLocation.z;
+				for(int i = 0; i < patrolPoints.Count; i++)
+				{
+
+					patrolPoints[i] += new Vector3(pawn.roomLocation.x * GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().roomSizeX, 0, pawn.roomLocation.z * GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().roomSizeZ);
+				}
+			}
+	}
     protected override void MakeDecisions() 
 	{
 		switch (state) 
@@ -56,6 +70,16 @@ public class TankAIDefender : AIController
 			//state change check
 				//done in sense update
 				break;
+			case States.Investigate:
+				if(IsFacing(lastTargetPos, 2.5f) && Vector3.Distance(pawn.transform.position, lastTargetPos) < 5)
+					{
+						Debug.Log("facing last target pos!");
+						SwapState(States.Guard);
+					} else
+					{
+						RotateTowards(lastTargetPos);
+					}
+				break;
 			case States.Guard:
 			//state behaviour
 				DoGuardState();
@@ -73,10 +97,17 @@ public class TankAIDefender : AIController
 		switch (state)
 		{
 			case States.Patrol:
-				subStateRotate = false;
+				//roundabout check for if this is the first cycle
+				if(spawnRoomGotten == true)
+				{
+					subStateRotate = false;
+				}
 				break;
 			case States.Fire:
-				
+
+				break;
+			case States.Investigate:
+				ToggleSenses(true,true);
 				break;
 			case States.Guard:
 				UpdatePatrol(ClosestPatrolPoint());
@@ -93,6 +124,9 @@ public class TankAIDefender : AIController
 			case States.Fire:
 			
 				
+				break;
+			case States.Investigate:
+				ToggleSenses(true,false);
 				break;
 			case States.Guard:
 			
@@ -116,12 +150,15 @@ public class TankAIDefender : AIController
 	}
 	protected virtual void NextPatrolPoint()
 	{
-		if(patrolPoint >= patrolPoints.Count - 1)
+		//increase patrol point by one
+		patrolPoint += 1;
+		//check if it needs to loop
+		if(patrolPoint >= patrolPoints.Count)
 		{
 			UpdatePatrol(0);
 		} else
 		{
-			UpdatePatrol(patrolPoint + 1);
+			UpdatePatrol(patrolPoint);
 		}
 		
 	}
@@ -129,7 +166,7 @@ public class TankAIDefender : AIController
 	{
 		
 		patrolPoint = point;
-		patrolPos = (patrolPoints[point] + new Vector3(spawnRoomX * GameManager.inst.roomSize, 0 , spawnRoomZ * GameManager.inst.roomSize));
+		patrolPos = (patrolPoints[point]);
 	}
 
 	protected override void OnSenseUpdate()
@@ -137,29 +174,33 @@ public class TankAIDefender : AIController
 		switch(state)
 		{
 			case States.Patrol:
-			if(target != null)
+				if(ChooseVisibleTarget())
 				{
-					if(visiblePawns.Contains(target))
-					{
-						SwapState(States.Fire);
-					}
+					SwapState(States.Fire);
 				}
 				break;
 			case States.Fire:
-				if(target != null)
+				if(!ChooseVisibleTarget())
 				{
-					if(!visiblePawns.Contains(target))
-					{
-						SwapState(States.Guard);
-					}
+					SwapState(States.Investigate);
 				}
 				break;
 			case States.Guard:
-			if(target != null)
+				if(ChooseVisibleTarget())
 				{
-					if(visiblePawns.Contains(target))
+					SwapState(States.Fire);
+				}
+				break;
+			case States.Investigate:
+
+				if(ChooseVisibleTarget())
+				{
+					SwapState(States.Fire);
+				} else
+				{
+					if(ChooseNoiseByPrio())
 					{
-						SwapState(States.Fire);
+						lastTargetPos = targetNoisePos;
 					}
 				}
 				break;
@@ -168,43 +209,40 @@ public class TankAIDefender : AIController
 
 	protected virtual void DoPatrolState()
 	{
-		if(spawnRoomGotten)
+		if(subStateRotate)
 		{
-			if(subStateRotate)
+			Vector3 startAng = pawn.transform.forward;
+			RotateClockwise();
+			//I think this measures in full rotations rather than degrees but im not changing the name
+			if (rotatedDegrees > 360)
 			{
-				Vector3 startAng = pawn.transform.forward;
-				RotateClockwise();
-				//I think this measures in full rotations rather than degrees but im not changing the name
-				if (rotatedDegrees > 360)
-				{
-					subStateRotate = false;
-					NextPatrolPoint();
-				}
-				else
-				{
-					rotatedDegrees += Vector3.Angle(startAng, pawn.transform.forward);
-				}
-			} else
-			{
-				if (DistanceCheck(patrolPos, 1.5f))
-				{
-					subStateRotate = true;
-					rotateStart = pawn.transform.rotation.y;
-				}
-				else
-				{
-					SeekSmart(patrolPos);
+				if(!spawnRoomGotten)
+				{	
 					rotatedDegrees = 0;
+					subStateRotate = false;
+					ShiftPatrolPoints();
+					UpdatePatrol(patrolPoint);
+				} else
+				{
+					NextPatrolPoint();
+					rotatedDegrees = 0;
+					subStateRotate = false;
 				}
+			}
+			else
+			{
+				rotatedDegrees += Vector3.Angle(startAng, pawn.transform.forward);
 			}
 		} else
 		{
-			if(pawn.roomLocation != null)
+			if (!DistanceCheck(patrolPos, seekDist))
 			{
-				spawnRoomGotten = true;
-				spawnRoomX = pawn.roomLocation.x;
-				spawnRoomZ = pawn.roomLocation.z;
-				UpdatePatrol(0);
+				SeekSmart(patrolPos);	
+				//rotateStart = pawn.transform.rotation.y;
+			}
+			else
+			{
+				subStateRotate = true;
 			}
 		}
 	}

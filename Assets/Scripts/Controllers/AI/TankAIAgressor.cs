@@ -13,7 +13,7 @@ public class TankAIAgressor : AIController
 	private Vector3 wanderPos;
 	private bool subStateWander;
 
-	public Pawn target;
+	
 	public override void Start()
     {
 		base.Start();
@@ -26,6 +26,7 @@ public class TankAIAgressor : AIController
     // Update is called once per frame
     void Update()
     {
+		
 		base.Update();
         MakeDecisions();
     }
@@ -41,15 +42,21 @@ public class TankAIAgressor : AIController
 				//done in sense check
 				break;
 			case States.Investigate:
-			//state behaviour
-				DoInvestigateState();
+			
 			//state change check
-				if(DistanceCheck(targetNoisePos,investigateDist))
+				if(DistanceCheck(targetNoisePos,investigateDist) && PointVisible(targetNoisePos))
 				{
-					if(PointVisible(targetNoisePos))
+					if(IsFacing(targetNoisePos, 2.5f))
 					{
 						SwapState(States.Idle);
+					} else
+					{
+						RotateTowards(targetNoisePos);
 					}
+				} else
+				{
+			//state behaviour
+					DoInvestigateState();
 				}
 				break;
 			case States.Chase:
@@ -58,7 +65,7 @@ public class TankAIAgressor : AIController
 				{
 					SeekSmart(target.transform.position);
 				}
-				Shoot();
+				//Shoot();
 			//state change check
 				if(pawn.health.hp <= lowhealth)
 				{
@@ -88,7 +95,7 @@ public class TankAIAgressor : AIController
 				ToggleSenses(true,true);
 				break;
 			case States.Investigate:
-				ToggleSenses(true,false);
+				ToggleSenses(true,true);
 				break;
 			case States.Chase:
 				ToggleSenses(true,false);
@@ -145,66 +152,50 @@ public class TankAIAgressor : AIController
 	{
 		if(target != null)
 		{
-			//Debug.Log("on sense updating!!!");
-			switch(state)
-			{
-				case States.Idle:
-					for(int i = 0; i < audibleNoises.Count; i++)
+			Debug.Log((target.controller as PlayerController).playerID);
+		}
+		//Debug.Log("on sense updating!!!");
+		switch(state)
+		{
+			case States.Idle:
+				
+				if(ChooseVisibleTarget())
+				{
+					SwapState(States.Chase);
+				} else
+				{
+					if(GetNoiseOfType(GameManager.Noises.Shot))
 					{
-						if(audibleNoises[i].noise == GameManager.Noises.Shot)
-						{
-							targetNoise = audibleNoises[i];
-							targetNoisePos = GetNoisePos(targetNoise);
-							SwapState(States.Investigate);
-						}
+						SwapState(States.Investigate);
 					}
-					if(target != null)
+				}
+				break;
+			case States.Investigate:
+				if(ChooseVisibleTarget())
+				{
+					SwapState(States.Chase);
+				} else {
+					if(ChooseNoiseByPrio())
 					{
-						if(visiblePawns.Contains(target))
-						{
-							SwapState(States.Chase);
-						}
+						//SwapState(States.Investigate);
 					}
-					/*
-					for (int i = 0; i < visiblePawns.Count; i++)
-					{
-						if(visiblePawns[i] == target) 
-						{
-							SwapState(States.Chase);
-						}
-					}
-					*/
-					break;
-				case States.Investigate:
-					if(target != null)
-					{
-						if(visiblePawns.Contains(target))
-						{
-							SwapState(States.Chase);
-						}
-					}
-						break;
-				case States.Chase:
-					if(target != null)
-					{
-						if(!visiblePawns.Contains(target))
-						{
-							targetNoisePos = target.transform.position;
-							SwapState(States.Investigate);
-						}
-					}
-					break;
-				case States.Flee:
-					if(target != null)
-					{
-						if(!visiblePawns.Contains(target))
-						{
-							targetNoisePos = target.transform.position;
-							SwapState(States.Investigate);
-						}
-					}
-					break;
-			}
+				}
+				break;
+			case States.Chase:
+				if(!ChooseVisibleTarget())
+				{
+					targetNoisePos = lastTargetPos;
+					targetNoise = null;
+					SwapState(States.Investigate);
+				}
+				break;
+			case States.Flee:
+				if(!ChooseVisibleTarget())
+				{
+						targetNoisePos = lastTargetPos;
+						SwapState(States.Investigate);
+				}
+				break;
 		}
 	}
 }

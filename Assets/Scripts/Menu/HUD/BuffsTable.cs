@@ -74,4 +74,12 @@ public class BuffsTable : MonoBehaviour
 		}
 	}
 
+	public void ClearBuffs()
+	{
+		foreach (BuffDisplay buff in listBuffs)
+		{
+			Destroy(buff.gameObject);
+		}
+		listBuffs.Clear();
+	}
 }

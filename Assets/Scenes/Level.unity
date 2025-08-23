@@ -412,6 +412,10 @@ PrefabInstance:
       propertyPath: titleTheme
       value: 
       objectReference: {fileID: 8300000, guid: c9d9603ad0f43474c855c339e94d0c55, type: 3}
+    - target: {fileID: 4018814385512604283, guid: d700579e04cf28e468c4436d33b59f54, type: 3}
+      propertyPath: ContinuousListMenuTheme.Array.size
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7435750166040262717, guid: d700579e04cf28e468c4436d33b59f54, type: 3}
       propertyPath: Loop
       value: 1
@@ -587,7 +591,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1724953687, guid: 013e85f5a2938574d9d9356c93fcb29c, type: 3}
       propertyPath: numEnemies
-      value: 0
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1724953687, guid: 013e85f5a2938574d9d9356c93fcb29c, type: 3}
       propertyPath: menuHandler
@@ -1910,12 +1914,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rooms:
-  - {fileID: 121816, guid: 792a3eee1b5604f408e2f8395ac2ba21, type: 3}
-  - {fileID: 121816, guid: 816447eda2d287448aa3c8f71f5b6e59, type: 3}
+  - {fileID: 121816, guid: 9f390830da9cc49428c183065cab513a, type: 3}
   - {fileID: 121816, guid: defe92bcb2219f94d86fdc86ded3c821, type: 3}
   mapExists: 0
-  mapWidth: 4
-  mapHeight: 3
+  mapWidth: 2
+  mapHeight: 2
   roomSizeX: 50
   roomSizeZ: 50
 --- !u!4 &1582491863

@@ -5,7 +5,6 @@ using UnityEngine;
 public class TankAISupport : AIController
 {
     public Pawn friend;
-	public Pawn target;
 	public float followDist;
 	public float investigateDist;
 	public float fleeDist;

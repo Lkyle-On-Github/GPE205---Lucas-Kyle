@@ -45,18 +45,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pawn: {fileID: 0}
+  score: 0
+  lives: 0
+  spawnpoint: {fileID: 0}
+  spawnpointIndex: 0
+  uiHandler: {fileID: 0}
   hearDistance: 0
-  viewAngle: 20
+  viewAngle: 45
   viewDistance: 1000
   canSee: 0
   canHear: 0
-  senseUpdateInterval: 0.05
+  senseUpdateInterval: 0.2
   seekDist: 2
   audibleNoises: []
-  noisePrio: 
+  noisePrio: 00000000
   visiblePawns: []
+  target: {fileID: 0}
   targetNoise: {fileID: 0}
   targetNoisePos: {x: 0, y: 0, z: 0}
+  lastTargetPos: {x: 0, y: 0, z: 0}
   moveCheckDist: 2
   shortCheckDist: 1.95
   turnDir: 0
@@ -68,9 +75,9 @@ MonoBehaviour:
   guardTime: 5
   guardDist: 3
   patrolPoint: 0
+  patrolPos: {x: 0, y: 0, z: 0}
   subStateRotate: 0
   rotatedDegrees: 0
   spawnRoomX: 0
   spawnRoomZ: 0
   spawnRoomGotten: 0
-  target: {fileID: 0}

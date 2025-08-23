@@ -6,7 +6,6 @@ public class TankAIDetective : AIController
 {
 	private Vector3 wanderPos;
 	public float wanderDist;
-	public Pawn target;
 	public List<Pawn> ignoreList;
 	public float investigateDist;
     // Start is called before the first frame update

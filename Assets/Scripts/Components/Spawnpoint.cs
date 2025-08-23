@@ -40,7 +40,9 @@ public class Spawnpoint : MonoBehaviour
 			}
 		}
 	}
-	public virtual void Spawn()
+
+	//returns the controller for use in AI specific spawn functions
+	public virtual GameObject Spawn()
 	{
 		GameObject objNewAI = Instantiate(controller, Vector3.zero, Quaternion.identity) as GameObject;
 		
@@ -63,6 +65,7 @@ public class Spawnpoint : MonoBehaviour
 		Damage damage = objNewPawn.GetComponent<Damage>();
 		damage.team = team;
 		CleanLists();
+		return objNewAI;
 	}
 
 	public virtual void Respawn(Controller controller)

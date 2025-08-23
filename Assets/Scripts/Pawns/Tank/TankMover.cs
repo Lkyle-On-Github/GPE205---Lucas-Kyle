@@ -43,6 +43,8 @@ public class TankMover : Mover
 		Quaternion targetRotation = Quaternion.LookRotation(vectorToTarget, Vector3.up);
 		// Rotate closer to that vector, but don't rotate more than our turn speed allows in one frame
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, pawn.turnSpeed * Time.deltaTime);
+		transform.rotation = new Quaternion(0, transform.rotation.y, 0, transform.rotation.w);
+		//transform.rotation.z = 0;
 
 	}
 	/*

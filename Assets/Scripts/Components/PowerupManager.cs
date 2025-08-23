@@ -37,7 +37,10 @@ public class PowerupManager : MonoBehaviour
 	public void AddToList(Powerup toAdd)
 	{
 		powerups.Add(toAdd);
-		pawn.controller.GetComponent<UIHandler>().AddBuff(toAdd);
+		if(pawn.controller.GetComponent<UIHandler>() != null)
+		{
+			pawn.controller.GetComponent<UIHandler>().AddBuff(toAdd);
+		}
 	}
 	public void LoseBuff (Powerup toRemove)
 	{

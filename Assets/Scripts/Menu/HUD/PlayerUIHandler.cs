@@ -131,7 +131,12 @@ public class PlayerUIHandler : UIHandler
 		{
 			livesDisplay.Decrement();
 		}
+		ClearBuffs();
 	}
 
+	public void ClearBuffs()
+	{
+		buffsTable.ClearBuffs();
+	}
 
 }
