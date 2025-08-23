@@ -42,7 +42,7 @@ public class AIController : Controller
 	public float navResetTime;
 	private float lastNavTrigger;
 	private float lastStuckCheckTime;
-	private bool stuckDir;
+	public bool stuckDir;
 	private Vector3 stuckCheckPos;
 
     // Start is called before the first frame update
@@ -138,8 +138,8 @@ public class AIController : Controller
 			{
 				if(Vector3.Distance(pawn.transform.position, GameManager.inst.activeNoises[i].noiseLocation) < (hearDistance + GameManager.inst.activeNoises[i].volumeDistance))
 				{
-					//adds it to the local array of noises this instance can hear
-					if(GameManager.inst.activeNoises[i].active == true)  
+					//adds it to the local array of noises this instance can hear if it is active and in the same room
+					if(GameManager.inst.activeNoises[i].active == true && GameManager.inst.activeNoises[i].pawn.roomLocation == pawn.roomLocation)  
 					{
 						audibleNoises.Add(GameManager.inst.activeNoises[i]);
 					}
@@ -153,6 +153,8 @@ public class AIController : Controller
 	{
 		visiblePawns.Clear();
 		List<Pawn> listOfPawns = GameManager.inst.listPawns;
+		//List<Pawn> listOfPawns = new List<Pawn>();
+		//GameManager.inst.listPawns.InsertRange(0, listOfPawns);
 		//removes itself from array first
 		listOfPawns.Remove(pawn);
 		for(int i = 0; i < listOfPawns.Count; i++)
@@ -466,8 +468,12 @@ public class AIController : Controller
 				{
 					pawn.RotateClockwise();
 					pawn.RotateClockwise();
+					pawn.RotateClockwise();
+					pawn.RotateClockwise();
 				} else
 				{
+					pawn.RotateCounterClockwise();
+					pawn.RotateCounterClockwise();
 					pawn.RotateCounterClockwise();
 					pawn.RotateCounterClockwise();
 				}
@@ -483,8 +489,8 @@ public class AIController : Controller
 	protected virtual Vector3 RandomRoomPos()
 	{
 		//get a valid position in the pawn's current room
-		int randomX = UnityEngine.Random.Range(-20,20) + pawn.roomLocation.x * 50;
-		int randomZ = UnityEngine.Random.Range(-20,20) + pawn.roomLocation.z * 50;
+		int randomX = UnityEngine.Random.Range(-20,20) + pawn.roomLocation.x * (int)GameManager.inst.roomSizeX;
+		int randomZ = UnityEngine.Random.Range(-20,20) + pawn.roomLocation.z * (int)GameManager.inst.roomSizeZ;
 		//return
 		return new Vector3(randomX, pawn.transform.position.y, randomZ);
 	}
@@ -494,8 +500,8 @@ public class AIController : Controller
 		//return a random room from roomList
 		Room randomRoom = GameManager.inst.listRooms[UnityEngine.Random.Range(0, GameManager.inst.listRooms.Count)];
 		//get a random valid position in the room
-		int randomX = UnityEngine.Random.Range(-20,20) + randomRoom.x * 50;
-		int randomZ = UnityEngine.Random.Range(-20,20) + randomRoom.z * 50;
+		int randomX = UnityEngine.Random.Range(-20,20) + randomRoom.x * (int)GameManager.inst.roomSizeX;
+		int randomZ = UnityEngine.Random.Range(-20,20) + randomRoom.z * (int)GameManager.inst.roomSizeZ;
 		//return
 		return new Vector3(randomX, pawn.transform.position.y, randomZ);
 	}
@@ -595,7 +601,74 @@ public class AIController : Controller
 		lastTargetPos = target.transform.position;
 		return true;
 	}
+	public bool ChooseCustomTarget(List<Pawn> list)
+	{
+		//reset list
+		List<Pawn> listSpottedPlayers = new List<Pawn>();
 
+		foreach(Pawn pawn in list)
+		{
+			if(GameManager.inst.listPlayers.Contains(pawn.controller as PlayerController))
+			{
+				listSpottedPlayers.Add(pawn);
+			}
+		}
+		//check if there is only one visible target and it can skip all that stuff
+		if(listSpottedPlayers.Count == 1)
+		{
+			target = listSpottedPlayers[0];
+			lastTargetPos = target.transform.position;
+			return true;
+		} else
+		{
+			if(listSpottedPlayers.Count == 0)
+			{
+				if(target != null)
+				{
+					lastTargetPos = target.transform.position;
+				}
+				target = null;
+				return false;
+			}
+		}
+
+		//if it has already chosen a target, only swap if the new target is closer and is angled well
+		if(target != null && listSpottedPlayers.Contains(target)) 
+		{
+			//calculate the target values beforehand to improve performance for more players
+			float targetAngle = Vector3.Angle(transform.forward, (target.transform.position - transform.position));
+			float targetDist = Vector3.Distance(transform.position, target.transform.position);
+			//make the spotted players besides for the target compare themselves to see if they are better targets
+			listSpottedPlayers.Remove(target);
+			foreach(Pawn player in listSpottedPlayers)
+			{
+				if(Vector3.Angle(transform.forward, (player.transform.position - transform.position)) < targetAngle +2.5)
+				{
+					if(Vector3.Distance(transform.position, player.transform.position) < targetDist)
+					{
+						target = player;
+					}
+				}
+			}
+			
+		} else
+		{
+			//none of the visible players are a previously selected target, so they are all considered fairly, but only distance is considered
+			float minDist = Vector3.Distance(transform.position, listSpottedPlayers[0].transform.position);
+			foreach(Pawn player in listSpottedPlayers)
+			{
+				float newDist = Vector3.Distance(transform.position, player.transform.position);
+				if(newDist < minDist)
+				{
+					minDist = newDist;
+					target = player;
+				}
+			}
+		}
+		//as long as the list of spotted players wasnt empty, it can return true
+		lastTargetPos = target.transform.position;
+		return true;
+	}
 	//
 	public bool GetNoiseOfType(GameManager.Noises noise)
 	{
@@ -650,10 +723,49 @@ public class AIController : Controller
 		return true;
 	}
 	
+	protected virtual bool ChooseCustomNoiseByPrio(List<NoiseMaker> list)
+	{
+		//IMPORTANT: if an error led you here, make sure you are clearing your targetNoises!
+		NoiseMaker bestNoise = null;
+		if(targetNoise != null)
+		{
+			//if target noise still exists but no noises can be found, continue pursuing target noise
+			if(list.Count == 0)
+			{
+				targetNoisePos = GetNoisePos(targetNoise);
+				return true;
+			}
+			//if target noise does not come from a destroyed noisemaker, ensure it still has priority
+			bestNoise = targetNoise;
+		} else
+		{
+			//if target noise is destroyed and no other noises can be found, destroy stale reference and return false.
+			if(list.Count == 0)
+			{
+				targetNoise = null;
+				return false;
+			}
+			//otherwise do a normal min check
+			bestNoise = list[0];
+		}
+		foreach(NoiseMaker noiseMaker in list)
+		{
+			if (noisePrio.IndexOf(noiseMaker.noise) < noisePrio.IndexOf(bestNoise.noise))
+			{
+				bestNoise = noiseMaker;
+			}
+		}
+		//a noise must have been found if the code got here
+		targetNoise = bestNoise;
+		targetNoisePos = GetNoisePos(targetNoise);
+		return true;
+	}
+
 	public bool IsFacing(Vector3 checkPos, float sensitivity)
 	{
 		checkPos = new Vector3(checkPos.x, pawn.transform.position.y, checkPos.z);
 		//Debug.Log((Vector3.Angle(pawn.transform.forward, checkPos - pawn.transform.position)));
 		return (Vector3.Angle(pawn.transform.forward, checkPos - pawn.transform.position) < sensitivity);
 	}
+
 }

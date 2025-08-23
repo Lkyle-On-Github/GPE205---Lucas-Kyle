@@ -50,7 +50,7 @@ MonoBehaviour:
   spawnpoint: {fileID: 0}
   spawnpointIndex: 0
   uiHandler: {fileID: 0}
-  hearDistance: 3
+  hearDistance: 15
   viewAngle: 90
   viewDistance: 100
   canSee: 0

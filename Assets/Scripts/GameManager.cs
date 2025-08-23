@@ -22,6 +22,8 @@ public class GameManager : MonoBehaviour
 	public Buttons menuHandler;
 	public enum MapGenSettings {Random, Custom, Daily};
 	public MapGenSettings mapGenMode;
+	public float roomSizeX;
+	public float roomSizeZ;
 	public int customSeed;
 	//wasnt sure what else to call it, used in RunMapGeneration to ensure custom seeds work properly, set true in GameOver and false in MainMenu.
 	public bool gameOverFlag;
@@ -39,7 +41,7 @@ public class GameManager : MonoBehaviour
 
 	
 	//Misc
-	public int roomSize;
+	//public int roomSize;
 	public List<PlayerController> listPlayers;
 	public List<Controller> listControllers;
 	public List<Pawn> listPawns;
@@ -86,7 +88,8 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-		
+		roomSizeX = hasMapGenerator.GetComponent<MapGenerator>().roomSizeX;
+		roomSizeX = hasMapGenerator.GetComponent<MapGenerator>().roomSizeZ;
 		//foreach(int i in )
 		//testarraydeleteplz = Enum.GetNames(typeof(PlayerKeys));
 		//asdfg = Enum.Parse<PlayerKeys>(testarraydeleteplz[2]);
@@ -365,12 +368,14 @@ public class GameManager : MonoBehaviour
 
 	public void RunMapDestruction()
 	{
-		DeletePairs();
+		
 		hasMapGenerator.GetComponent<MapGenerator>().DeleteMap();
+		DeletePairs();
 		//I had to cave
 		listSpawns.Clear();
 		listEnemySpawns.Clear();
 		listPlayerSpawns.Clear();
+		activeNoises.Clear();
 	}
 
 	public void SyncMapGenSettings()
@@ -590,9 +595,12 @@ public class GameManager : MonoBehaviour
 	{
 		if(listPlayers.Count == 0)
 		{
-			SwapState(GameStates.GameOver);
-			menuHandler.SwapState(Buttons.MenuStates.GameOver, false);
-			menuHandler.gameOverScore.text = new string("Total Score: " + earnedScore);
+			if(menuHandler != null)
+			{
+				SwapState(GameStates.GameOver);
+				menuHandler.SwapState(Buttons.MenuStates.GameOver, false);
+				menuHandler.gameOverScore.text = new string("Total Score: " + earnedScore);
+			}
 		} else
 		{
 			UpdateCams();

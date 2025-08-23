@@ -11,9 +11,7 @@ public class TankAIDetective : AIController
     // Start is called before the first frame update
     void Start()
     {
-		noisePrio.Add(GameManager.Noises.Shot);
-		noisePrio.Add(GameManager.Noises.Hit);
-		noisePrio.Add(GameManager.Noises.Movement);
+		base.Start();
 		StateStart();
 		ignoreList.Add(pawn);
 		//perhaps I should make this pick the closest player?
@@ -37,7 +35,7 @@ public class TankAIDetective : AIController
 				SeekSmart(wanderPos);
 				if(DistanceCheck(wanderPos, wanderDist))
 				{
-					wanderPos = RandomRoomPos();
+					wanderPos = RandomMapPos();
 				}
 			//state change check
 				//in sense check.
@@ -49,7 +47,7 @@ public class TankAIDetective : AIController
 				{
 					if(PointVisible(targetNoisePos))
 					{
-					wanderPos = RandomRoomPos();
+					wanderPos = RandomMapPos();
 					SwapState(States.Idle);
 					}
 				}
@@ -67,15 +65,21 @@ public class TankAIDetective : AIController
 				//in sense check.
 				break;
 			case States.Follow:
-			//state behaviour
-				SeekSmart(wanderPos);
+			
 			//state change check
-				if(DistanceCheck(wanderPos, wanderDist))
+				if(DistanceCheck(wanderPos, wanderDist) && PointVisible(wanderPos))
 				{
-					if(PointVisible(wanderPos))
+					if(IsFacing(wanderPos, 0.5f))
 					{
 						SwapState(States.Idle);
+					} else
+					{
+						RotateTowards(wanderPos);
 					}
+				} else
+				{
+				//state behaviour
+					SeekSmart(wanderPos);
 				}
 				break;
 		}
@@ -96,6 +100,7 @@ public class TankAIDetective : AIController
 				ToggleSenses(true,false);
 				break;
 			case States.Follow:
+				wanderPos = lastTargetPos;
 				ToggleSenses(true,true);
 				break;
 		}
@@ -112,100 +117,112 @@ public class TankAIDetective : AIController
 
 	protected override void OnSenseUpdate()
 	{
-		if(target != null)
+		CleanIgnoreList();
+		switch(state)
 		{
-			switch(state)
+			case States.Idle:
+				if(ChooseCustomTarget(DetectiveSight()))
+				{
+					SwapState(States.Chase);
+				} else
+				{
+					if(ChooseCustomNoiseByPrio(DetectiveHearing()))
+					{
+						SwapState(States.Investigate);
+					}
+				}
+				
+				break;
+			case States.Investigate:
+				if(ChooseCustomTarget(DetectiveSight()))
+				{
+					SwapState(States.Chase);
+				} else
+				{
+					if(ChooseCustomNoiseByPrio(DetectiveHearing()))
+					{
+						//SwapState(States.Investigate);
+					}
+				}
+				break;
+			case States.Chase:
+				if(!ChooseCustomTarget(DetectiveSight()))
+				{
+					SwapState(States.Follow);
+				}
+				/*
+				might re-enable if follow isnt very effective
+					else
+				{
+					if(ChooseCustomNoiseByPrio(DetectiveHearing()))
+					{
+						SwapState(States.Investigate);
+					}
+				}
+				*/
+				break;
+			case States.Follow:
+				if(ChooseCustomTarget(DetectiveSight()))
+				{
+					SwapState(States.Chase);
+				} else
+				{
+					if(ChooseCustomNoiseByPrio(DetectiveHearing()))
+					{
+						SwapState(States.Investigate);
+					}
+				}
+				break;
+		}
+	}
+	public List<Pawn> DetectiveSight()
+	{
+		//reset list
+		List<Pawn> returnList = new List<Pawn>();
+		foreach(Pawn pawn in visiblePawns)
+		{
+			//filters visible pawns by if they are players, adds non player pawns to ignore list.
+			if(GameManager.inst.listPlayers.Contains(pawn.controller as PlayerController))
 			{
-				case States.Idle:
-					for(int i = 0; i < visiblePawns.Count; i++)
-					{
-						if(visiblePawns[i] == target)
-						{
-							SwapState(States.Chase);
-						}
-						else 
-						{
-							if(!ignoreList.Contains(visiblePawns[i]))
-							{
-							ignoreList.Add(visiblePawns[i]);
-							}
-						}
-					}
-					for(int i = 0; i < audibleNoises.Count; i++)
-					{
-						if(!ignoreList.Contains(audibleNoises[i].pawn))
-						{
-							targetNoise = audibleNoises[i];
-							targetNoisePos = GetNoisePos(targetNoise);
-							SwapState(States.Investigate);
-						}
-					}
-					break;
-				case States.Investigate:
-					for(int i = 0; i < visiblePawns.Count; i++)
-					{
-						if(visiblePawns[i] == target)
-						{
-							SwapState(States.Chase);
-						}
-						else 
-						{
-							if(!ignoreList.Contains(visiblePawns[i]))
-							{
-							ignoreList.Add(visiblePawns[i]);
-							}
-						}
-						
-					}
-					for(int i = 0; i < audibleNoises.Count; i++)
-					{
-						if(!ignoreList.Contains(audibleNoises[i].pawn))
-						{
-							if(CheckNoisePrio(audibleNoises[i]))
-							{
-								targetNoise = audibleNoises[i];
-								targetNoisePos = GetNoisePos(targetNoise);
-							}
-						}
-					}
-					break;
-				case States.Chase:
-					if(!visiblePawns.Contains(target))
-					{
-						wanderPos = target.transform.position;
-						SwapState(States.Follow);
-					}
-					break;
-				case States.Follow:
-					for(int i = 0; i < visiblePawns.Count; i++)
-					{
-						if(visiblePawns[i] == target)
-						{
-							SwapState(States.Chase);
-						}
-						else 
-						{
-							if(!ignoreList.Contains(visiblePawns[i]))
-							{
-							ignoreList.Add(visiblePawns[i]);
-							}
-						}
-					}
-					for(int i = 0; i < audibleNoises.Count; i++)
-						{
-						if(!ignoreList.Contains(audibleNoises[i].pawn))
-						{
-							if(audibleNoises[i].noise == GameManager.Noises.Movement)
-							{
-								targetNoise = audibleNoises[i];
-								targetNoisePos = GetNoisePos(targetNoise);
-								SwapState(States.Investigate);
-							}
-						}
-					}
-					break;
-					
+				returnList.Add(pawn);
+			}
+			else 
+			{
+				if(!ignoreList.Contains(pawn))
+				{
+					ignoreList.Add(pawn);
+				}
 			}
 		}
+		return returnList;
+	}
+	public void CleanIgnoreList()
+	{
+		foreach (Pawn pawn in ignoreList)
+		{
+			if(pawn == null)
+			{
+				ignoreList.Remove(pawn);
+			}
+		}
+	}
+	public List<NoiseMaker> DetectiveHearing()
+	{
+		//clears target noise from the list if it is on ignore list
+		if(targetNoise != null && ignoreList.Contains(targetNoise.pawn))
+		{
+			targetNoise = null;
+		}
+		//filters audible noises by the ignore list.
+		List<NoiseMaker> returnList = new List<NoiseMaker>();
+		foreach(NoiseMaker noiseMaker in audibleNoises)
+		{
+
+			if(!ignoreList.Contains(noiseMaker.pawn))
+			{
+				returnList.Add(noiseMaker);
+			}
+		}
+		return returnList;
 	}
 }

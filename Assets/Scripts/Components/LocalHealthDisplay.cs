@@ -18,7 +18,7 @@ public class LocalHealthDisplay : HealthDisplay
     // Update is called once per frame
     void Update()
     {
-		if(GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().mapExists)
+		if(GameManager.inst.hasMapGenerator.GetComponent<MapGenerator>().mapExists && pawn.roomLocation != null)
 		{
 			Vector3 targetDir = pawn.roomLocation.roomCamera.gameObject.transform.position - transform.position;
 			//gameObject.transform.rotation = Vector3.Angle(gameObject.transform.position, pawn.roomLocation.roomCamera.transform.position);

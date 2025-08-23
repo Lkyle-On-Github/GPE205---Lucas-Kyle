@@ -64,6 +64,7 @@ public class TankAIAgressor : AIController
 				if(target != null)
 				{
 					SeekSmart(target.transform.position);
+					Shoot();
 				}
 				//Shoot();
 			//state change check

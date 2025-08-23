@@ -1915,10 +1915,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rooms:
   - {fileID: 121816, guid: 9f390830da9cc49428c183065cab513a, type: 3}
-  - {fileID: 121816, guid: defe92bcb2219f94d86fdc86ded3c821, type: 3}
   mapExists: 0
-  mapWidth: 2
-  mapHeight: 2
+  mapWidth: 1
+  mapHeight: 1
   roomSizeX: 50
   roomSizeZ: 50
 --- !u!4 &1582491863

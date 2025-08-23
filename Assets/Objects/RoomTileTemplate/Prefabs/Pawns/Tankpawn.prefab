@@ -298,8 +298,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8b29fc7731f22748b59b1fba398ebd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  volumeDistance: 5
-  noise: 0
+  volumeDistance: 8
+  noise: 3
   active: 0
   maxNoiseTime: 0.4
   noiseTime: 0
@@ -320,8 +320,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c6020e41e089914e8bd66294879ef2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  volumeDistance: 7
-  noise: 0
+  volumeDistance: 10
+  noise: 1
   active: 0
   maxNoiseTime: 0.4
   noiseTime: 0
@@ -364,6 +364,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e81bdef1779a7749b2adaee054c9608, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  powerups: []
+  pawn: {fileID: 0}
 --- !u!82 &-7612730929615490252
 AudioSource:
   m_ObjectHideFlags: 0
