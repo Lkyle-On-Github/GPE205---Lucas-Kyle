@@ -71,7 +71,7 @@ public class TankAIDefender : AIController
 				//done in sense update
 				break;
 			case States.Investigate:
-				if(IsFacing(lastTargetPos, 2.5f) && Vector3.Distance(pawn.transform.position, lastTargetPos) < 5)
+				if(IsFacing(lastTargetPos, 2.5f))
 					{
 						Debug.Log("facing last target pos!");
 						SwapState(States.Guard);

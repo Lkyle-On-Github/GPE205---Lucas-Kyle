@@ -21,9 +21,20 @@ public class SpeedPickup : Pickup
     {
         // variable to store other object's PowerupController - if it has one
         PowerupManager powerupManager = other.GetComponent<PowerupManager>();
-		GameManager.inst.SpawnSoundEffect(audioClip, transform.position);
         // If the other object has a PowerupController
         if (powerupManager != null) {
+			bool playerInRoom = false;
+			foreach(PlayerController player in GameManager.inst.listPlayers)
+			{
+				if(powerupManager.pawn.roomLocation == player.pawn.roomLocation)
+				{
+					playerInRoom = true;
+				}
+			}
+			if(playerInRoom)
+			{
+				GameManager.inst.SpawnSoundEffect(audioClip, transform.position);
+			}
             // Add the powerup
             powerupManager.GainBuff(powerup);
 

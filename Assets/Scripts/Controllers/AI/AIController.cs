@@ -171,7 +171,7 @@ public class AIController : Controller
 			if(Physics.Raycast(pawn.transform.position, pawnVector, out hitInfo, viewDistance, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal));
 			{
 				//can not see through other tanks unfortunately
-				if(hitInfo.transform.gameObject.GetComponent<Pawn>() == listOfPawns[i])
+				if(hitInfo.transform != null && hitInfo.transform.gameObject.GetComponent<Pawn>() == listOfPawns[i])
 					//pawns on the same team can be seen at any angle, this should hopefully make them easier to track
 					if(listOfPawns[i].damage.team == pawn.damage.team)
 					{
@@ -489,8 +489,8 @@ public class AIController : Controller
 	protected virtual Vector3 RandomRoomPos()
 	{
 		//get a valid position in the pawn's current room
-		int randomX = UnityEngine.Random.Range(-20,20) + pawn.roomLocation.x * (int)GameManager.inst.roomSizeX;
-		int randomZ = UnityEngine.Random.Range(-20,20) + pawn.roomLocation.z * (int)GameManager.inst.roomSizeZ;
+		int randomX = (UnityEngine.Random.Range(-20,20) + pawn.roomLocation.x * (int)GameManager.inst.roomSizeX);
+		int randomZ = (UnityEngine.Random.Range(-20,20) + pawn.roomLocation.z * (int)GameManager.inst.roomSizeZ);
 		//return
 		return new Vector3(randomX, pawn.transform.position.y, randomZ);
 	}
@@ -706,6 +706,13 @@ public class AIController : Controller
 		{
 			if(noiseMaker.noise == noise)
 			{
+				//end immediately if a player is found
+				if(GameManager.inst.listPlayers.Contains(noiseMaker.pawn.controller as PlayerController))
+				{
+					targetNoise = noiseMaker;
+					targetNoisePos = GetNoisePos(targetNoise);
+					return true;
+				}
 				targetNoise = noiseMaker;
 				targetNoisePos = GetNoisePos(targetNoise);
 				foundNoise = true;
@@ -743,6 +750,13 @@ public class AIController : Controller
 		{
 			if (noisePrio.IndexOf(noiseMaker.noise) < noisePrio.IndexOf(bestNoise.noise))
 			{
+				//end immediately if a player is found
+				if(GameManager.inst.listPlayers.Contains(bestNoise.pawn.controller as PlayerController))
+				{
+					targetNoise = noiseMaker;
+					targetNoisePos = GetNoisePos(targetNoise);
+					return true;
+				}
 				bestNoise = noiseMaker;
 			}
 		}
@@ -781,6 +795,13 @@ public class AIController : Controller
 		{
 			if (noisePrio.IndexOf(noiseMaker.noise) < noisePrio.IndexOf(bestNoise.noise))
 			{
+				//end immediately if a player is found
+				if(GameManager.inst.listPlayers.Contains(bestNoise.pawn.controller as PlayerController))
+				{
+					targetNoise = noiseMaker;
+					targetNoisePos = GetNoisePos(targetNoise);
+					return true;
+				}
 				bestNoise = noiseMaker;
 			}
 		}

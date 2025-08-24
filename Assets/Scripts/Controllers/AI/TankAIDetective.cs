@@ -13,6 +13,7 @@ public class TankAIDetective : AIController
     {
 		base.Start();
 		StateStart();
+		wanderPos = RandomMapPos();
 		ignoreList.Add(pawn);
 		//perhaps I should make this pick the closest player?
         target = GameManager.inst.listPlayers[0].pawn;
@@ -42,6 +43,14 @@ public class TankAIDetective : AIController
 				break;
 			case States.Investigate:
 			//state behaviour
+				if(targetNoise == null)
+				{
+					targetNoise = null;
+					audibleNoises.Clear();
+					wanderPos = RandomMapPos();
+					SwapState(States.Idle);
+
+				}
 				SeekSmart(targetNoisePos);
 				if(DistanceCheck(targetNoisePos, investigateDist))
 				{
@@ -198,12 +207,17 @@ public class TankAIDetective : AIController
 	}
 	public void CleanIgnoreList()
 	{
+		List<Pawn> removeList = new List<Pawn>();
 		foreach (Pawn pawn in ignoreList)
 		{
 			if(pawn == null)
 			{
-				ignoreList.Remove(pawn);
+				removeList.Add(pawn);
 			}
+		}
+		foreach(Pawn pawn in removeList)
+		{
+			ignoreList.Remove(pawn);
 		}
 	}
 	public List<NoiseMaker> DetectiveHearing()

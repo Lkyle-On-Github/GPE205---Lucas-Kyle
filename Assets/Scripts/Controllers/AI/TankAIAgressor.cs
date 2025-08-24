@@ -11,13 +11,16 @@ public class TankAIAgressor : AIController
 
 	private float idleStartTime;
 	private Vector3 wanderPos;
-	private bool subStateWander;
+	public bool subStateWander;
 
 	
 	public override void Start()
     {
 		base.Start();
-		StateStart();
+		//StateStart();
+		ToggleSenses(true,true);
+		//wanderPos = RandomRoomPos();
+		subStateWander = false;
 		//perhaps I should make this pick the closest player?
         target = GameManager.inst.listPlayers[0].pawn;
 		
@@ -26,7 +29,6 @@ public class TankAIAgressor : AIController
     // Update is called once per frame
     void Update()
     {
-		
 		base.Update();
         MakeDecisions();
     }
@@ -165,7 +167,7 @@ public class TankAIAgressor : AIController
 					SwapState(States.Chase);
 				} else
 				{
-					if(GetNoiseOfType(GameManager.Noises.Hit))
+					if(GetNoiseOfType(GameManager.Noises.Shot))
 					{
 						SwapState(States.Investigate);
 					}
@@ -197,6 +199,13 @@ public class TankAIAgressor : AIController
 						SwapState(States.Investigate);
 				}
 				break;
+		}
+	}
+	public override void OnPawnHit()
+	{
+		if(state == States.Idle || state == States.Investigate)
+		{
+			//targetNoisePos = (pawn.transform.position + (pawn.transform.forward * -5));
 		}
 	}
 }

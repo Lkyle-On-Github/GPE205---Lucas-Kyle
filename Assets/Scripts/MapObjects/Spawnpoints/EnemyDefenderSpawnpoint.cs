@@ -17,21 +17,6 @@ public class EnemyDefenderSpawnpoint : EnemyTankSpawnpoint
 
 	public override GameObject Spawn()
 	{
-		/*
-		GameObject objNewAI = Instantiate(controller, Vector3.zero, Quaternion.identity) as GameObject;
-        GameObject objNewPawn = Instantiate(pawn, this.transform.position, this.transform.rotation) as GameObject;
-
-		//find the controller and pawn components
-        Controller compController = objNewAI.GetComponent<Controller>();
-        Pawn compPawn = objNewPawn.GetComponent<Pawn>();
-
-		//hook controller to pawn
-		compController.pawn = compPawn;
-		compPawn.controller = compController;
-
-		Damage damage = objNewPawn.GetComponent<Damage>();
-		damage.team = team;
-		*/
 
 		GameObject objNewAI = base.Spawn();
 		TankAIDefender AI = objNewAI.GetComponent<TankAIDefender>();

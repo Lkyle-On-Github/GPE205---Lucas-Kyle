@@ -52,7 +52,7 @@ MonoBehaviour:
   uiHandler: {fileID: 0}
   hearDistance: 15
   viewAngle: 90
-  viewDistance: 100
+  viewDistance: 50
   canSee: 0
   canHear: 0
   senseUpdateInterval: 0.05
@@ -69,6 +69,7 @@ MonoBehaviour:
   turnDir: 0
   navDir: 0
   navResetTime: 0.5
+  stuckDir: 0
   lastStateSwapTime: 0
   state: 0
   wanderDist: 3

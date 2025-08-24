@@ -58,6 +58,10 @@ public class Health : MonoBehaviour
 		{
 			Die();
 		}
+		if(pawn != null && pawn.controller != null) 
+		{
+			pawn.controller.OnPawnHit();
+		}
 	}
 
 	public virtual void TakeHealing(float healing)

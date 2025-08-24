@@ -52,7 +52,7 @@ MonoBehaviour:
   uiHandler: {fileID: 0}
   hearDistance: 10
   viewAngle: 60
-  viewDistance: 1000
+  viewDistance: 50
   canSee: 0
   canHear: 0
   senseUpdateInterval: 0.2

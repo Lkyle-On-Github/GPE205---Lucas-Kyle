@@ -98,6 +98,7 @@ public class PlayerController : Controller
 	{
 		base.GainScore(toGain);
 		uiHandler.UpdateScore(score);
+		GameManager.inst.AddScore(toGain);
 	}
 
 	public void OnDestroy()
@@ -106,13 +107,19 @@ public class PlayerController : Controller
 		{
 			
 			//Add score to total
-			GameManager.inst.earnedScore += score;
+
 			//Remove from player list
 			if (GameManager.inst.listPlayers != null) 
 			{
 					GameManager.inst.listPlayers.Remove(this);
 			}
-			GameManager.inst.OnPlayerDeath();
+			if(GameManager.inst.gameState != GameManager.GameStates.Win)
+			{
+				GameManager.inst.OnPlayerDeath();
+			} else
+			{
+				GameManager.inst.listPawns.Clear();
+			}
 			base.OnDestroy();
 		}
 	}

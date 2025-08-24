@@ -574,6 +574,10 @@ PrefabInstance:
       value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 1724953687, guid: 013e85f5a2938574d9d9356c93fcb29c, type: 3}
+      propertyPath: winScore
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 1724953687, guid: 013e85f5a2938574d9d9356c93fcb29c, type: 3}
       propertyPath: gameMixer
       value: 
       objectReference: {fileID: 24100000, guid: adaabb8368bb63c4ea27f1c2babc3349, type: 2}
@@ -1914,10 +1918,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rooms:
-  - {fileID: 121816, guid: 9f390830da9cc49428c183065cab513a, type: 3}
+  - {fileID: 121816, guid: 792a3eee1b5604f408e2f8395ac2ba21, type: 3}
+  - {fileID: 121816, guid: 816447eda2d287448aa3c8f71f5b6e59, type: 3}
+  - {fileID: 121816, guid: defe92bcb2219f94d86fdc86ded3c821, type: 3}
+  - {fileID: 121816, guid: 4d92317aa8b391b4282718643b7cece3, type: 3}
+  - {fileID: 121816, guid: da1db4f6a5d447a4cafd644985b5c8a2, type: 3}
   mapExists: 0
-  mapWidth: 1
-  mapHeight: 1
+  mapWidth: 3
+  mapHeight: 4
   roomSizeX: 50
   roomSizeZ: 50
 --- !u!4 &1582491863
@@ -2321,6 +2329,18 @@ PrefabInstance:
     - target: {fileID: 8881815936504871939, guid: 8c7e540bf3da14842aeb1a5c505ec9bd, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: -214
+      objectReference: {fileID: 0}
+    - target: {fileID: 8881815936582043534, guid: 8c7e540bf3da14842aeb1a5c505ec9bd, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8881815936582043534, guid: 8c7e540bf3da14842aeb1a5c505ec9bd, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8881815936582043534, guid: 8c7e540bf3da14842aeb1a5c505ec9bd, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8881815936582043534, guid: 8c7e540bf3da14842aeb1a5c505ec9bd, type: 3}
       propertyPath: m_FontData.m_VerticalOverflow

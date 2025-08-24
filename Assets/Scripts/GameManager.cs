@@ -7,7 +7,7 @@ using UnityEngine.Audio;
 [System.Serializable]
 public class GameManager : MonoBehaviour
 {
-	public enum GameStates {TitleScreen, MainMenu, Options, Game, GameOver};
+	public enum GameStates {TitleScreen, MainMenu, Options, Game, GameOver, Win};
 	public GameStates gameState;
 	public float lastStateSwapTime;
 
@@ -31,6 +31,8 @@ public class GameManager : MonoBehaviour
 	public int numEnemies;
 
 	public float earnedScore;
+	public float winScore;
+	public int currLevel;
 	
 	public UnityEngine.Random.State randomState;
 
@@ -88,8 +90,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-		roomSizeX = hasMapGenerator.GetComponent<MapGenerator>().roomSizeX;
-		roomSizeX = hasMapGenerator.GetComponent<MapGenerator>().roomSizeZ;
+		
 		//foreach(int i in )
 		//testarraydeleteplz = Enum.GetNames(typeof(PlayerKeys));
 		//asdfg = Enum.Parse<PlayerKeys>(testarraydeleteplz[2]);
@@ -102,6 +103,8 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
 			listPawns = new List<Pawn>();
 		 	listControllers = new List<Controller>();
+			roomSizeX = hasMapGenerator.GetComponent<MapGenerator>().roomSizeX;
+			roomSizeX = hasMapGenerator.GetComponent<MapGenerator>().roomSizeZ;
 			
 			//	UpdateControls(true, PlayerKeys.Forward, KeyCode.W);
 			
@@ -376,6 +379,8 @@ public class GameManager : MonoBehaviour
 		listEnemySpawns.Clear();
 		listPlayerSpawns.Clear();
 		activeNoises.Clear();
+		hudController.p1UI.buffsTable.ClearBuffs();
+		hudController.p2UI.buffsTable.ClearBuffs();
 	}
 
 	public void SyncMapGenSettings()
@@ -526,12 +531,14 @@ public class GameManager : MonoBehaviour
 				break;
 			case GameStates.MainMenu:
 				gameOverFlag = false;
+				earnedScore = 0;
+				currLevel = 0;
 				break;
 			case GameStates.Options:
 				//RunMapDestruction();
 				break;
 			case GameStates.Game:
-				
+				currLevel += 1;
 				hudController.gameObject.SetActive(true);
 				if(!hasMapGenerator.GetComponent<MapGenerator>().mapExists)
 				{
@@ -544,7 +551,13 @@ public class GameManager : MonoBehaviour
 				}
 				break;
 			case GameStates.GameOver:
+				earnedScore = 0;
+				currLevel = 0;
 				gameOverFlag = true;
+				break;
+			case GameStates.Win:
+				gameOverFlag = true;
+				RunMapDestruction();
 				break;
 		}
 	}
@@ -568,6 +581,9 @@ public class GameManager : MonoBehaviour
 				}
 				break;
 			case GameStates.GameOver:
+
+				break;
+			case GameStates.Win:
 
 				break;
 		}
@@ -597,9 +613,10 @@ public class GameManager : MonoBehaviour
 		{
 			if(menuHandler != null)
 			{
+				menuHandler.gameOverScore.text = new string("Total Score: " + earnedScore);
 				SwapState(GameStates.GameOver);
 				menuHandler.SwapState(Buttons.MenuStates.GameOver, false);
-				menuHandler.gameOverScore.text = new string("Total Score: " + earnedScore);
+				
 			}
 		} else
 		{
@@ -625,6 +642,20 @@ public class GameManager : MonoBehaviour
 		} else
 		{
 			p2Controls.ChangeKey(toChange, newKey);
+		}
+	}
+
+	public void AddScore(float score)
+	{
+		earnedScore += score;
+		if(earnedScore >= winScore * currLevel)
+		{
+			if(menuHandler != null)
+			{
+				SwapState(GameStates.Win);
+				menuHandler.SwapState(Buttons.MenuStates.Win, false);
+				menuHandler.winScore.text = new string("Current Score: " + earnedScore);
+			}
 		}
 	}
 }

@@ -19,6 +19,7 @@ public class SpeedPowerup : Powerup
 			if (targetPawn != null) 
 			{
 				targetPawn.moveSpeed += strength;
+				targetPawn.turnSpeed += (strength * 20);
 				//I have to increase the bullet speed otherwise it is dumb.
 				Shooter pawnShooter = targetPawn.GetComponent<Shooter>();
 				pawnShooter.fireForce += strength;
@@ -49,6 +50,7 @@ public class SpeedPowerup : Powerup
 					if (targetPawn != null) 
 					{
 						targetPawn.moveSpeed += strength;
+						targetPawn.turnSpeed += (strength * 20);
 						//I have to increase the bullet speed otherwise it is dumb.
 						Shooter pawnShooter = targetPawn.GetComponent<Shooter>();
 						pawnShooter.fireForce += strength;
@@ -67,6 +69,7 @@ public class SpeedPowerup : Powerup
         if (targetPawn != null) 
         {
 			targetPawn.moveSpeed -= strength;
+			targetPawn.turnSpeed -= (strength * 20);
 			//I have to increase the bullet speed otherwise it is dumb.
 			Shooter pawnShooter = targetPawn.GetComponent<Shooter>();
 			pawnShooter.fireForce -= strength;

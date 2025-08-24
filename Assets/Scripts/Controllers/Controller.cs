@@ -95,4 +95,9 @@ public class Controller : MonoBehaviour
 			Debug.Log("pawn spawnpoint wasn't set properly! correcting values, but the list may not be updated correctly");
 		}
 	}
+
+	public virtual void OnPawnHit()
+	{
+		
+	}
 }

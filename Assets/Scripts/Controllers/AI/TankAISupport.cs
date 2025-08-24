@@ -74,7 +74,7 @@ public class TankAISupport : AIController
 							SeekSmart(friend.transform.position);
 						} else 
 						{
-							if(friendSeesTarget)
+							if(friendSeesTarget && target != null)
 							{
 								RotateTowards(target.transform.position);
 								MoveForward();

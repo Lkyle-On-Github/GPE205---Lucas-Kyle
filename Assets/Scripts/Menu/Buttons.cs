@@ -13,14 +13,19 @@ public class Buttons : MonoBehaviour
 	public GameObject settingsButtonObject;
 	public GameObject backButtonObjectAsd;
 	public GameObject quitButtonObject;
+
+	//public GameObject winScreenPlayButtonObject;
+	//public GameObject winScreenMenuButtonObject;
 	public GameObject titleScreen;
 	public GameObject creditsScreen;
 	public GameObject settingsScreen;
 	public GameObject controlsScreen;
 	public GameObject gameOverScreen;
+	public GameObject winScreen;
 	public Text gameOverScore;
+	public Text winScore;
 
-	public enum MenuStates {Title, Main, Credits, Settings, Game, GameOver};
+	public enum MenuStates {Title, Main, Credits, Settings, Game, GameOver, Win};
 	public MenuStates menuState;
 	private MenuStates returnState;
 
@@ -197,6 +202,10 @@ public class Buttons : MonoBehaviour
 				gameOverScreen.gameObject.SetActive(true);
 				quitButtonObject.SetActive(true);
 				break;
+			case MenuStates.Win:
+				settingsButtonObject.SetActive(false);
+				winScreen.gameObject.SetActive(true);
+				break;
 		}
 	}
 	protected virtual void StateEnd()
@@ -224,6 +233,9 @@ public class Buttons : MonoBehaviour
 				gameOverScreen.gameObject.SetActive(false);
 				GameManager.inst.RunMapDestruction();
 				quitButtonObject.SetActive(false);
+				break;
+			case MenuStates.Win:
+				winScreen.gameObject.SetActive(false);
 				break;
 		}
 	}
