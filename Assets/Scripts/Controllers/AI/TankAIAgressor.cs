@@ -44,7 +44,7 @@ public class TankAIAgressor : AIController
 			case States.Investigate:
 			
 			//state change check
-				if(DistanceCheck(targetNoisePos,investigateDist) && PointVisible(targetNoisePos))
+				if(DistanceCheck(targetNoisePos,investigateDist))
 				{
 					if(IsFacing(targetNoisePos, 2.5f))
 					{
@@ -165,7 +165,7 @@ public class TankAIAgressor : AIController
 					SwapState(States.Chase);
 				} else
 				{
-					if(GetNoiseOfType(GameManager.Noises.Shot))
+					if(GetNoiseOfType(GameManager.Noises.Hit))
 					{
 						SwapState(States.Investigate);
 					}

@@ -58,7 +58,7 @@ MonoBehaviour:
   senseUpdateInterval: 0.2
   seekDist: 2
   audibleNoises: []
-  noisePrio: 0100000000000000
+  noisePrio: 0300000000000000
   visiblePawns: []
   target: {fileID: 0}
   targetNoise: {fileID: 0}
@@ -69,6 +69,7 @@ MonoBehaviour:
   turnDir: 0
   navDir: 0
   navResetTime: 0.5
+  stuckDir: 0
   lastStateSwapTime: 0
   state: 0
   investigateDist: 3

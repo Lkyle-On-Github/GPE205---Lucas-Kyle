@@ -519,7 +519,36 @@ public class AIController : Controller
 		float pointDist = Vector3.Distance(point, pawn.transform.position);
 		//if it hit nothing
 		return !Physics.Raycast(pawn.transform.position, toPoint, out hitInfo, pointDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
-			
+	}
+	protected virtual bool PawnVisible(Pawn checkPawn)
+	{
+		RaycastHit hitInfo;
+		Vector3 toPoint = checkPawn.transform.position - pawn.transform.position;
+		float pointDist = Vector3.Distance(checkPawn.transform.position, pawn.transform.position);
+		Physics.Raycast(pawn.transform.position, toPoint, out hitInfo, pointDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+		bool didHit = Physics.Raycast(pawn.transform.position, toPoint, out hitInfo, pointDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+			if(!DidHitWall(didHit, hitInfo)) 
+			{
+				return true;
+			} else
+			{
+				return false;
+			}
+	}
+	protected virtual bool PawnVisible(Vector3 pawnPos)
+	{
+		RaycastHit hitInfo;
+		Vector3 toPoint = pawnPos - pawn.transform.position;
+		float pointDist = Vector3.Distance(pawnPos, pawn.transform.position);
+		Physics.Raycast(pawn.transform.position, toPoint, out hitInfo, pointDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+		bool didHit = Physics.Raycast(pawn.transform.position, toPoint, out hitInfo, pointDist, LayerMask.GetMask("Default"), QueryTriggerInteraction.UseGlobal);
+			if(!DidHitWall(didHit, hitInfo)) 
+			{
+				return true;
+			} else
+			{
+				return false;
+			}
 	}
 	public override void OnDestroy()
 	{

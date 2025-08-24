@@ -69,9 +69,12 @@ MonoBehaviour:
   turnDir: 0
   navDir: 0
   navResetTime: 0.5
+  stuckDir: 0
   lastStateSwapTime: 0
   state: 0
   friend: {fileID: 0}
   followDist: 3
   investigateDist: 2
   fleeDist: 2
+  wanderDist: 4
+  idleTime: 2
